@@ -1,0 +1,15 @@
+package model.types;
+
+public enum MarketSort {
+    STANDARD,
+    CORRECT_SCORE,
+    FIRST_SCORER,
+    HEAD_TO_HEAD,
+    HIGHER_LOWER,
+    NEW_HANDICAP_BETTING,
+    WIN_DRAW_WIN,
+    SCORECAST,
+    WESTERN_HANDICAP,
+    INDEX_MARKET,
+    ASIAN_HANDICAP
+}

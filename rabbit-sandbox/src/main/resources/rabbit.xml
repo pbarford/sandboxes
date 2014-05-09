@@ -1,0 +1,48 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.2.xsd
+            http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp-2.2.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <context:annotation-config/>
+    <context:component-scan base-package="rabbit" />
+
+    <rabbit:admin id="amqpAdmin" connection-factory="cachingConnectionFactory"/>
+    <rabbit:queue id="inboundEvent" name="inboundEvent" auto-delete="false" durable="false" declared-by="amqpAdmin"/>
+    <rabbit:queue id="outboundEvent" name="outboundEvent" auto-delete="false" durable="false" declared-by="amqpAdmin"/>
+
+    <rabbit:fanout-exchange id="inboundEx" name="inboundEx" durable="false" auto-delete="false" declared-by="amqpAdmin">
+        <rabbit:bindings>
+            <rabbit:binding queue="inboundEvent" />
+        </rabbit:bindings>
+    </rabbit:fanout-exchange>
+
+    <rabbit:direct-exchange id="outboundEx" name="outboundEx" durable="false" auto-delete="false" declared-by="amqpAdmin" >
+        <rabbit:bindings>
+            <rabbit:binding queue="outboundEvent" key="event"/>
+        </rabbit:bindings>
+    </rabbit:direct-exchange>
+
+    <bean id="amqpConnectionFactory" class="com.rabbitmq.client.ConnectionFactory">
+        <property name="host" value="127.0.0.1" />
+        <property name="port" value="5671" />
+        <property name="username" value="guest"/>
+        <property name="password" value="guest"/>
+    </bean>
+
+    <bean id="cachingConnectionFactory" class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
+        <constructor-arg index="0" ref="amqpConnectionFactory"/>
+    </bean>
+
+
+    <bean id="messageConverter" class="org.springframework.amqp.support.converter.JsonMessageConverter" />
+    <rabbit:template id="rabbitTemplate" message-converter="messageConverter" connection-factory="cachingConnectionFactory"/>
+
+
+
+
+</beans>

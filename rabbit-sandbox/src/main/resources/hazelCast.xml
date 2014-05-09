@@ -1,0 +1,67 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <bean id="clusterMemberListener" class="hazelcast.ClusterMemberListener"/>
+
+    <bean id="listenerConfig" class="com.hazelcast.config.ListenerConfig">
+        <property name="implementation" ref="clusterMemberListener" />
+    </bean>
+
+    <util:list id="listenerConfigs" value-type="com.hazelcast.config.ListenerConfig">
+        <ref bean="listenerConfig"/>
+    </util:list>
+
+    <bean id="hazelcastInstance" class="com.hazelcast.core.Hazelcast" factory-method="newHazelcastInstance">
+        <constructor-arg>
+            <bean class="com.hazelcast.config.Config">
+                <property name="listenerConfigs" ref="listenerConfigs"/>
+                <property name="networkConfig">
+                    <bean class="com.hazelcast.config.NetworkConfig">
+                        <property name="port" value="9999"/>
+                        <property name="portAutoIncrement" value="true"/>
+                        <property name="join">
+                            <bean class="com.hazelcast.config.JoinConfig">
+                                <property name="tcpIpConfig">
+                                    <bean class="com.hazelcast.config.TcpIpConfig">
+                                        <property name="connectionTimeoutSeconds" value="10"/>
+                                        <property name="enabled" value="true"/>
+                                        <property name="members" value="127.0.0.1"/>
+                                    </bean>
+                                </property>
+                                <property name="awsConfig">
+                                    <bean class="com.hazelcast.config.AwsConfig">
+                                        <property name="enabled" value="false"/>
+                                    </bean>
+                                </property>
+                                <property name="multicastConfig">
+                                    <bean class="com.hazelcast.config.MulticastConfig">
+                                        <property name="enabled" value="false"/>
+                                    </bean>
+                                </property>
+                            </bean>
+                        </property>
+                    </bean>
+                </property>
+                <property name="groupConfig">
+                    <bean class="com.hazelcast.config.GroupConfig">
+                        <property name="name" value="test"/>
+                        <property name="password" value="test"/>
+                    </bean>
+                </property>
+                <property name="properties">
+                    <props>
+                        <prop key="hazelcast.shutdownhook.enabled">false</prop>
+                        <prop key="hazelcast.logging.type">slf4j</prop>
+                        <prop key="hazelcast.jmx">true</prop>
+                        <prop key="hazelcast.jmx.detailed">true</prop>
+                    </props>
+                </property>
+            </bean>
+        </constructor-arg>
+    </bean>
+</beans>
