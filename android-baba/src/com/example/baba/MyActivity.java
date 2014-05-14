@@ -36,6 +36,7 @@ public class MyActivity extends Activity {
 
     public void generateLetters(View view) {
         currentLetterSequence = "";
+        ((TextView) findViewById(R.id.result)).setText("");
         handler.post(new LetterRunner(firstLetter, 1000));
         handler.post(new LetterRunner(secondLetter, 1750));
         handler.post(new LetterRunner(thirdLetter, 2500));
@@ -44,12 +45,10 @@ public class MyActivity extends Activity {
             public void run() {
                 mixUpKeys();
             }
-        }, 2750);
+        }, 4750);
     }
 
     public void clickKey(View view) {
-        System.out.println(view.getId());
-        System.out.println(((Button) view).getText());
         switch (currentChoice) {
             case 1:
                 firstLetter.setText(((Button) view).getText());

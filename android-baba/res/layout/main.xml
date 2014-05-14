@@ -66,6 +66,7 @@
         <TableRow android:layout_gravity="center_horizontal">
             <GridLayout android:layout_span="6" android:layout_gravity="center_horizontal">
                 <Button android:id="@+id/key1"
+                        style="@style/keys"
                         android:tag="key1"
                         android:layout_width="@dimen/key_size"
                         android:layout_height="@dimen/key_size"
@@ -74,6 +75,7 @@
                         android:text="A"
                         android:onClick="clickKey"/>
                 <Button android:id="@+id/key2"
+                        style="@style/keys"
                         android:tag="key2"
                         android:layout_width="@dimen/key_size"
                         android:layout_height="@dimen/key_size"
@@ -82,6 +84,7 @@
                         android:text="B"
                         android:onClick="clickKey"/>
                 <Button android:id="@+id/key3"
+                        style="@style/keys"
                         android:tag="key3"
                         android:layout_width="@dimen/key_size"
                         android:layout_height="@dimen/key_size"
@@ -90,6 +93,7 @@
                         android:text="C"
                         android:onClick="clickKey"/>
                 <Button android:id="@+id/key4"
+                        style="@style/keys"
                         android:tag="key4"
                         android:layout_width="@dimen/key_size"
                         android:layout_height="@dimen/key_size"
@@ -101,6 +105,7 @@
         </TableRow>
         <TableRow android:layout_gravity="center_horizontal">
             <Button android:id="@+id/key5"
+                    style="@style/keys"
                     android:tag="key5"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -109,6 +114,7 @@
                     android:text="E"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key6"
+                    style="@style/keys"
                     android:tag="key6"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -117,6 +123,7 @@
                     android:text="F"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key7"
+                    style="@style/keys"
                     android:tag="key7"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -125,6 +132,7 @@
                     android:text="G"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key8"
+                    style="@style/keys"
                     android:tag="key8"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -133,6 +141,7 @@
                     android:text="H"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key9"
+                    style="@style/keys"
                     android:tag="key9"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -141,6 +150,7 @@
                     android:text="I"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key10"
+                    style="@style/keys"
                     android:tag="key10"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -152,6 +162,7 @@
         <TableRow android:layout_gravity="center_horizontal">
 
             <Button android:id="@+id/key11"
+                    style="@style/keys"
                     android:tag="key11"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -160,6 +171,7 @@
                     android:text="K"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key12"
+                    style="@style/keys"
                     android:tag="key12"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -168,6 +180,7 @@
                     android:text="L"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key13"
+                    style="@style/keys"
                     android:tag="key13"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -176,6 +189,7 @@
                     android:text="M"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key14"
+                    style="@style/keys"
                     android:tag="key14"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -184,6 +198,7 @@
                     android:text="N"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key15"
+                    style="@style/keys"
                     android:tag="key15"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -192,6 +207,7 @@
                     android:text="O"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key16"
+                    style="@style/keys"
                     android:tag="key16"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -203,6 +219,7 @@
         <TableRow android:layout_gravity="center_horizontal">
 
             <Button android:id="@+id/key17"
+                    style="@style/keys"
                     android:tag="key17"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -211,6 +228,7 @@
                     android:text="Q"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key18"
+                    style="@style/keys"
                     android:tag="key18"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -219,6 +237,7 @@
                     android:text="R"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key19"
+                    style="@style/keys"
                     android:tag="key19"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -227,6 +246,7 @@
                     android:text="S"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key20"
+                    style="@style/keys"
                     android:tag="key20"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -235,6 +255,7 @@
                     android:text="T"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key21"
+                    style="@style/keys"
                     android:tag="key21"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -243,6 +264,7 @@
                     android:text="U"
                     android:onClick="clickKey"/>
             <Button android:id="@+id/key22"
+                    style="@style/keys"
                     android:tag="key22"
                     android:layout_width="@dimen/key_size"
                     android:layout_height="@dimen/key_size"
@@ -254,6 +276,7 @@
         <TableRow android:layout_gravity="center_horizontal">
             <GridLayout android:layout_span="6" android:layout_gravity="center_horizontal">
                 <Button android:id="@+id/key23"
+                        style="@style/keys"
                         android:tag="key23"
                         android:layout_width="@dimen/key_size"
                         android:layout_height="@dimen/key_size"
@@ -262,6 +285,7 @@
                         android:text="W"
                         android:onClick="clickKey"/>
                 <Button android:id="@+id/key24"
+                        style="@style/keys"
                         android:tag="key24"
                         android:layout_width="@dimen/key_size"
                         android:layout_height="@dimen/key_size"
@@ -270,6 +294,7 @@
                         android:text="X"
                         android:onClick="clickKey"/>
                 <Button android:id="@+id/key25"
+                        style="@style/keys"
                         android:tag="key25"
                         android:layout_width="@dimen/key_size"
                         android:layout_height="@dimen/key_size"
@@ -278,6 +303,7 @@
                         android:text="Y"
                         android:onClick="clickKey"/>
                 <Button android:id="@+id/key26"
+                        style="@style/keys"
                         android:tag="key26"
                         android:layout_width="@dimen/key_size"
                         android:layout_height="@dimen/key_size"

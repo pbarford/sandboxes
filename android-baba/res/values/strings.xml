@@ -7,4 +7,7 @@
     <string name="title_activity_main">MainActivity</string>
     <dimen name="key_size">40dp</dimen>
     <dimen name="key_font_size">20dp</dimen>
+    <style name="keys">
+        <item name="android:textColor">#F87531</item>
+    </style>
 </resources>
