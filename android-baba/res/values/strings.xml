@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">baba</string>
+    <string name="edit_message">Enter a message</string>
+    <string name="button_start">Start</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+    <dimen name="key_size">40dp</dimen>
+    <dimen name="key_font_size">20dp</dimen>
+</resources>
