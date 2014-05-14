@@ -1,6 +1,7 @@
 package com.example.baba;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -36,7 +37,6 @@ public class MyActivity extends Activity {
 
     public void generateLetters(View view) {
         currentLetterSequence = "";
-        ((TextView) findViewById(R.id.result)).setText("");
         handler.post(new LetterRunner(firstLetter, 1000));
         handler.post(new LetterRunner(secondLetter, 1750));
         handler.post(new LetterRunner(thirdLetter, 2500));
@@ -68,11 +68,15 @@ public class MyActivity extends Activity {
     }
 
     private void checkGuess() {
+        int duration = Toast.LENGTH_LONG;
+        Context context = getApplicationContext();
         String guess = firstLetter.getText() + "" +  secondLetter.getText() + "" + thirdLetter.getText();
         if(guess.equalsIgnoreCase(currentLetterSequence)) {
-            ((TextView) findViewById(R.id.result)).setText("correct");
+            Toast toast = Toast.makeText(context, "correct", duration);
+            toast.show();
         } else {
-            ((TextView) findViewById(R.id.result)).setText("incorrect, should be " + currentLetterSequence);
+            Toast toast = Toast.makeText(context, "incorrect, should be " + currentLetterSequence, duration);
+            toast.show();
         }
     }
 

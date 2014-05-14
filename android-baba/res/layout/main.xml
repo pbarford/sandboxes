@@ -44,18 +44,6 @@
             android:text="@string/button_start"
             android:onClick="generateLetters"/>
 
-    <TextView
-            android:id="@+id/result"
-            android:layout_marginTop="8dp"
-            android:layout_marginLeft="20dp"
-            android:layout_width="250dp"
-            android:layout_height="40dp"
-            android:layout_below="@id/firstLetter"
-            android:layout_toRightOf="@+id/button_start"
-            android:gravity="center"
-            android:textStyle="bold"
-            android:text=""/>
-
     <TableLayout android:id="@+id/keys"
                  android:layout_width="wrap_content"
                  android:layout_height="wrap_content"
