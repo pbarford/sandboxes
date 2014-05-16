@@ -77,7 +77,7 @@ public class MyActivity extends Activity {
         if(guess.equalsIgnoreCase(currentLetterSequence)) {
             //Toast toast = Toast.makeText(context, "correct", duration);
             //toast.show();
-            speech.setText("Correct!");
+            speech.setText("Correct!\nTry Again!");
         } else {
             //Toast toast = Toast.makeText(context, "incorrect, should be " + currentLetterSequence, duration);
             //toast.show();
@@ -94,6 +94,8 @@ public class MyActivity extends Activity {
             allocatedLetters.add(letter);
             key.setText(String.valueOf((char) (letter.intValue() + 'A')));
         }
+
+        speech.setText("Enter your answer");
 
         table.setVisibility(View.VISIBLE);
     }
