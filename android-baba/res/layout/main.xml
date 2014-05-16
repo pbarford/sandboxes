@@ -2,47 +2,55 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/parentLayout"
               android:orientation="vertical"
-              android:paddingLeft="16dp"
-              android:paddingRight="16dp"
+              android:paddingLeft="1dp"
+              android:paddingRight="1dp"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent">
-
-    <TextView
-            android:id="@+id/firstLetter"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:gravity="center"
-            android:textStyle="bold"
-            android:textSize="46dip"
-            android:text=""/>
-    <TextView
-            android:id="@+id/secondLetter"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:paddingRight="3dp"
-            android:layout_toRightOf="@+id/firstLetter"
-            android:gravity="center"
-            android:textStyle="bold"
-            android:textSize="46dip"
-            android:text=""/>
-    <TextView
-            android:id="@+id/thirdLetter"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:paddingRight="3dp"
-            android:layout_toRightOf="@+id/secondLetter"
-            android:gravity="center"
-            android:textStyle="bold"
-            android:textSize="46dip"
-            android:text=""/>
+    <TableLayout android:id="@+id/letters"
+                 android:layout_width="fill_parent"
+                 android:layout_height="wrap_content"
+                 android:stretchColumns="*"
+                 android:layout_centerHorizontal="true">
+        <TableRow android:layout_width="fill_parent"
+                  android:layout_gravity="center_horizontal">
+            <TextView
+                    android:id="@+id/firstLetter"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:textSize="46dip"
+                    android:text=""/>
+            <TextView
+                    android:id="@+id/secondLetter"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:paddingRight="3dp"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:textSize="46dip"
+                    android:text=""/>
+            <TextView
+                    android:id="@+id/thirdLetter"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:paddingRight="3dp"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:textSize="46dip"
+                    android:text=""/>
+        </TableRow>
+    </TableLayout>
 
     <Button
             android:id="@+id/button_start"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/firstLetter"
-            android:text="@string/button_start"
-            android:onClick="generateLetters"/>
+            android:layout_below="@id/letters"
+            android:background="@drawable/green_button"
+            android:text="Go"
+            android:onClick="generateLetters"
+            style="@style/button_text" />
 
     <TableLayout android:id="@+id/keys"
                  android:layout_width="wrap_content"
@@ -52,30 +60,26 @@
                  android:layout_marginTop="10dp"
                  android:visibility="invisible">
         <TableRow android:layout_gravity="center_horizontal">
-            <GridLayout android:layout_span="6" android:layout_gravity="center_horizontal">
-                <Button android:id="@+id/key1"
-                        style="@style/keys"
-                        android:tag="key1"
-                        android:text="A"
-                        android:onClick="clickKey"/>
-                <Button android:id="@+id/key2"
-                        style="@style/keys"
-                        android:tag="key2"
-                        android:text="B"
-                        android:onClick="clickKey"/>
-                <Button android:id="@+id/key3"
-                        style="@style/keys"
-                        android:tag="key3"
-                        android:text="C"
-                        android:onClick="clickKey"/>
-                <Button android:id="@+id/key4"
-                        style="@style/keys"
-                        android:tag="key4"
-                        android:text="D"
-                        android:onClick="clickKey"/>
-            </GridLayout>
-        </TableRow>
-        <TableRow android:layout_gravity="center_horizontal">
+            <Button android:id="@+id/key1"
+                    style="@style/keys"
+                    android:tag="key1"
+                    android:text="A"
+                    android:onClick="clickKey"/>
+            <Button android:id="@+id/key2"
+                    style="@style/keys"
+                    android:tag="key2"
+                    android:text="B"
+                    android:onClick="clickKey"/>
+            <Button android:id="@+id/key3"
+                    style="@style/keys"
+                    android:tag="key3"
+                    android:text="C"
+                    android:onClick="clickKey"/>
+            <Button android:id="@+id/key4"
+                    style="@style/keys"
+                    android:tag="key4"
+                    android:text="D"
+                    android:onClick="clickKey"/>
             <Button android:id="@+id/key5"
                     style="@style/keys"
                     android:tag="key5"
@@ -91,6 +95,8 @@
                     android:tag="key7"
                     android:text="G"
                     android:onClick="clickKey"/>
+        </TableRow>
+        <TableRow android:layout_gravity="center_horizontal">
             <Button android:id="@+id/key8"
                     style="@style/keys"
                     android:tag="key8"
@@ -106,9 +112,6 @@
                     android:tag="key10"
                     android:text="J"
                     android:onClick="clickKey"/>
-        </TableRow>
-        <TableRow android:layout_gravity="center_horizontal">
-
             <Button android:id="@+id/key11"
                     style="@style/keys"
                     android:tag="key11"
@@ -129,6 +132,8 @@
                     android:tag="key14"
                     android:text="N"
                     android:onClick="clickKey"/>
+        </TableRow>
+        <TableRow android:layout_gravity="center_horizontal">
             <Button android:id="@+id/key15"
                     style="@style/keys"
                     android:tag="key15"
@@ -139,9 +144,6 @@
                     android:tag="key16"
                     android:text="P"
                     android:onClick="clickKey"/>
-        </TableRow>
-        <TableRow android:layout_gravity="center_horizontal">
-
             <Button android:id="@+id/key17"
                     style="@style/keys"
                     android:tag="key17"
@@ -167,14 +169,14 @@
                     android:tag="key21"
                     android:text="U"
                     android:onClick="clickKey"/>
-            <Button android:id="@+id/key22"
-                    style="@style/keys"
-                    android:tag="key22"
-                    android:text="V"
-                    android:onClick="clickKey"/>
         </TableRow>
-        <TableRow android:layout_gravity="center_horizontal">
-            <GridLayout android:layout_span="6" android:layout_gravity="center_horizontal">
+        <TableRow android:layout_gravity="center_horizontal" >
+            <GridLayout android:layout_span="7" android:layout_gravity="center_horizontal">
+                <Button android:id="@+id/key22"
+                        style="@style/keys"
+                        android:tag="key22"
+                        android:text="V"
+                        android:onClick="clickKey"/>
                 <Button android:id="@+id/key23"
                         style="@style/keys"
                         android:tag="key23"
@@ -198,5 +200,26 @@
             </GridLayout>
         </TableRow>
     </TableLayout>
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/keys">
+    <ImageView android:id="@+id/pony"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/little_pony"/>
+    <TextView  android:id="@+id/speech"
+               android:layout_width="200dp"
+               android:layout_height="100dp"
+               android:paddingRight="3dp"
+               android:layout_toRightOf="@+id/pony"
+               android:layout_centerVertical="true"
+               android:gravity="center"
+               android:textStyle="bold"
+               android:textSize="16dip"
+               android:textColor="#000000"
+               android:background="@drawable/speech"
+               android:text="correct"/>
+    </RelativeLayout>
 </RelativeLayout>
 

@@ -1,9 +1,13 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
+       http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.2.xsd
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd
-        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="hazelcastInstance" class="com.hazelcast.core.Hazelcast" factory-method="newHazelcastInstance">
         <constructor-arg>
@@ -97,10 +101,10 @@
 
                 <property name="properties">
                     <props>
-                        <prop key="hazelcast.shutdownhook.enabled">false</prop>
-                        <prop key="hazelcast.logging.type">slf4j</prop>
-                        <prop key="hazelcast.jmx">true</prop>
-                        <prop key="hazelcast.jmx.detailed">true</prop>
+                        <prop key="resilience.shutdownhook.enabled">false</prop>
+                        <prop key="resilience.logging.type">slf4j</prop>
+                        <prop key="resilience.jmx">true</prop>
+                        <prop key="resilience.jmx.detailed">true</prop>
                     </props>
                 </property>
             </bean>

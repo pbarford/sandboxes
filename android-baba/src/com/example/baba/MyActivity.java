@@ -16,6 +16,7 @@ public class MyActivity extends Activity {
     private Random rand = new Random();
     private Handler handler = new Handler();
 
+    private TextView speech;
     private TextView firstLetter;
     private TextView secondLetter;
     private TextView thirdLetter;
@@ -33,6 +34,8 @@ public class MyActivity extends Activity {
         firstLetter = (TextView) findViewById(R.id.firstLetter);
         secondLetter = (TextView) findViewById(R.id.secondLetter);
         thirdLetter = (TextView) findViewById(R.id.thirdLetter);
+        speech = (TextView) findViewById(R.id.speech);
+        speech.setText("Hi there Alexandra!\nClick 'Go' to get started");
     }
 
     public void generateLetters(View view) {
@@ -68,15 +71,17 @@ public class MyActivity extends Activity {
     }
 
     private void checkGuess() {
-        int duration = Toast.LENGTH_LONG;
-        Context context = getApplicationContext();
+        //int duration = Toast.LENGTH_LONG;
+        //Context context = getApplicationContext();
         String guess = firstLetter.getText() + "" +  secondLetter.getText() + "" + thirdLetter.getText();
         if(guess.equalsIgnoreCase(currentLetterSequence)) {
-            Toast toast = Toast.makeText(context, "correct", duration);
-            toast.show();
+            //Toast toast = Toast.makeText(context, "correct", duration);
+            //toast.show();
+            speech.setText("Correct!");
         } else {
-            Toast toast = Toast.makeText(context, "incorrect, should be " + currentLetterSequence, duration);
-            toast.show();
+            //Toast toast = Toast.makeText(context, "incorrect, should be " + currentLetterSequence, duration);
+            //toast.show();
+            speech.setText("Incorrect, should be " + currentLetterSequence+ "\nTry Again!");
         }
     }
 

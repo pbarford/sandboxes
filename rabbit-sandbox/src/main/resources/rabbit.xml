@@ -8,8 +8,6 @@
             http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp-2.2.xsd
             http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-    <context:annotation-config/>
-    <context:component-scan base-package="rabbit" />
 
     <rabbit:admin id="amqpAdmin" connection-factory="cachingConnectionFactory"/>
     <rabbit:queue id="inboundEvent" name="inboundEvent" auto-delete="false" durable="false" declared-by="amqpAdmin"/>
@@ -38,6 +36,11 @@
         <constructor-arg index="0" ref="amqpConnectionFactory"/>
     </bean>
 
+    <bean id="consumerTaskExecutor1" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="maxPoolSize" value="1" />
+        <property name="queueCapacity" value="1" />
+        <property name="threadNamePrefix" value="t1" />
+    </bean>
 
     <bean id="messageConverter" class="org.springframework.amqp.support.converter.JsonMessageConverter" />
     <rabbit:template id="rabbitTemplate" message-converter="messageConverter" connection-factory="cachingConnectionFactory"/>
