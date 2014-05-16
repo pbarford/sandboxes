@@ -20,6 +20,7 @@ public class MyActivity extends Activity {
     private TextView firstLetter;
     private TextView secondLetter;
     private TextView thirdLetter;
+    private TableLayout keys;
 
     private int currentChoice = 1;
     private String currentLetterSequence ="";
@@ -34,11 +35,14 @@ public class MyActivity extends Activity {
         firstLetter = (TextView) findViewById(R.id.firstLetter);
         secondLetter = (TextView) findViewById(R.id.secondLetter);
         thirdLetter = (TextView) findViewById(R.id.thirdLetter);
+        keys = (TableLayout) findViewById(R.id.keys);
         speech = (TextView) findViewById(R.id.speech);
         speech.setText("Hi there Alexandra!\nClick 'Go' to get started");
     }
 
     public void generateLetters(View view) {
+        speech.setText("Generating ....");
+        keys.setVisibility(View.INVISIBLE);
         currentLetterSequence = "";
         handler.post(new LetterRunner(firstLetter, 1000));
         handler.post(new LetterRunner(secondLetter, 1750));
@@ -86,18 +90,17 @@ public class MyActivity extends Activity {
     }
 
     private void mixUpKeys() {
-        TableLayout table = (TableLayout) findViewById(R.id.keys);
+
         List<Integer> allocatedLetters = new ArrayList<Integer>();
         for(int i=1; i <= 26; i++) {
-            Button key = (Button) table.findViewWithTag("key" + i);
+            Button key = (Button) keys.findViewWithTag("key" + i);
             Integer letter = nextKey(allocatedLetters);
             allocatedLetters.add(letter);
             key.setText(String.valueOf((char) (letter.intValue() + 'A')));
         }
 
         speech.setText("Enter your answer");
-
-        table.setVisibility(View.VISIBLE);
+        keys.setVisibility(View.VISIBLE);
     }
 
     private Integer nextKey(List<Integer> allocatedLetters) {
