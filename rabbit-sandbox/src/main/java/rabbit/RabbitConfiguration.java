@@ -46,6 +46,7 @@ public class RabbitConfiguration {
         simpleMessageListenerContainer.setPrefetchCount(-1);
         simpleMessageListenerContainer.setMessageListener(new ChannelAwareMessageListener(eventLevelReactor, messageAcknowledgeReactor, eventProcessorLMAX));
         simpleMessageListenerContainer.setQueues(new Queue("inboundEvent", true, false, false));
+        simpleMessageListenerContainer.setExclusive(true);
         simpleMessageListenerContainer.setConsumerArguments(Collections.<String, Object>singletonMap("x-priority", Integer.valueOf(100)));
         simpleMessageListenerContainer.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         simpleMessageListenerContainer.start();

@@ -29,6 +29,16 @@ object PatternMatching {
     ))
     println(show(data))
 
+    val d = for {
+      JObj(bindings) <- List(data)
+      JSeq(phones) = bindings("phoneNumbers")
+      JObj(phone) <- phones
+      JStr(digits) = phone("number")
+      if digits.startsWith("086")
+    } yield(bindings("firstname"), bindings("lastname"), phone("number"))
+
+    println(d)
+
     val f : PartialFunction[String, String] = {case "ping" => "pong"}
     println(f.isDefinedAt("paul"))
     println(f.isDefinedAt("ping"))
