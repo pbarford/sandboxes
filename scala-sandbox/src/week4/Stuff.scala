@@ -1,17 +1,17 @@
 package week4
 
 trait List[T] {
-  def isEmpty : Boolean
+  def isEmpty : week4.Boolean
   def head : T
   def tail: List[T]
 }
 
 class Cons[T](val head: T, val tail: List[T]) extends List[T] {
-  def isEmpty: Boolean = false
+  def isEmpty: week4.Boolean = False
 }
 
 class Nil[T] extends List[T] {
-  def isEmpty: Boolean = true
+  def isEmpty: week4.Boolean = True
   def head: Nothing = throw new NoSuchElementException("Nil.head")
   def tail: Nothing = throw new NoSuchElementException("Nil.tail")
 }
