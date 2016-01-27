@@ -2,6 +2,7 @@ package model;
 
 import model.types.*;
 import lombok.Data;
+import model.validation.custom.annotation.MappingKey;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import javax.xml.bind.annotation.XmlType;
@@ -15,6 +16,7 @@ import java.util.Map;
 @XmlType
 public class Selection implements Serializable {
 
+    @MappingKey
     private Integer id;
 
     private String name;

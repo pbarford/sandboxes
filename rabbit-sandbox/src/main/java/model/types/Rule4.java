@@ -1,6 +1,7 @@
 package model.types;
 
 import lombok.Data;
+import model.validation.custom.annotation.MappingKey;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import javax.xml.bind.annotation.XmlType;
@@ -12,6 +13,7 @@ import java.io.Serializable;
 @XmlType
 public class Rule4 implements Serializable {
 
+    @MappingKey
     private Long id;
 
     private Integer deductionPercentage;

@@ -1,6 +1,7 @@
 package model.types;
 
 import lombok.Data;
+import model.validation.custom.annotation.MappingKey;
 
 import java.io.Serializable;
 
@@ -8,6 +9,7 @@ import java.io.Serializable;
 @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 public class Runner implements Serializable {
 
+    @MappingKey
     private Integer runnerNumber;
 
     private String runnerName;

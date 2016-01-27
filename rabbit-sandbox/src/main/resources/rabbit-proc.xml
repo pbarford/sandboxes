@@ -1,0 +1,41 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.2.xsd
+            http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.2.xsd
+            http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp-2.2.xsd
+            http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <bean id="amqpConnectionFactory" class="com.rabbitmq.client.ConnectionFactory">
+        <property name="host" value="127.0.0.1" />
+        <property name="port" value="5671" />
+        <property name="username" value="guest"/>
+        <property name="password" value="guest"/>
+    </bean>
+
+    <bean id="cachingConnectionFactory" class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
+        <constructor-arg index="0" ref="amqpConnectionFactory"/>
+    </bean>
+
+
+
+    <int-amqp:inbound-channel-adapter id="inbound"
+                                      acknowledge-mode="AUTO"
+                                      auto-startup="true"
+                                      concurrent-consumers="1"
+                                      mapped-request-headers="*"
+                                      queue-names="#{test}"
+                                      connection-factory="cachingConnectionFactory"
+                                      channel="inboundChannel" />
+
+    <int:channel id="inboundChannel" />
+
+
+
+</beans>

@@ -1,6 +1,7 @@
 package model.types;
 
 import lombok.Data;
+import model.validation.custom.annotation.MappingKey;
 
 import javax.xml.bind.annotation.XmlType;
 import java.io.Serializable;
@@ -12,5 +13,6 @@ public class PhotoFinish implements Serializable {
 
     private Boolean unresolved;
 
+    @MappingKey
     private Integer contendedPosition;
 }

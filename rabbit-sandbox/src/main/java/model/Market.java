@@ -2,6 +2,7 @@ package model;
 
 import model.types.*;
 import lombok.Data;
+import model.validation.custom.annotation.MappingKey;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -14,6 +15,7 @@ import java.util.List;
 @XmlRootElement
 public class Market implements Serializable {
 
+    @MappingKey
     private Integer id;
 
     private Action action;
