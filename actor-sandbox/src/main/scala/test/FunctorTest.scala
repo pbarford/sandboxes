@@ -1,6 +1,6 @@
 package test
 
-trait Functor[F[_]] {
+trait Functor[F[_]] { self =>
 
   def map[A, B](fa: F[A])(f: A => B): F[B]
 
@@ -9,6 +9,12 @@ trait Functor[F[_]] {
   def as [A,B](fa:F[A], b: => B):F[B] = map(fa)(_ => b)
 
   def void[A](fa: F[A]):F[Unit] = as(fa, ())
+
+  def compose[G[_]](implicit G: Functor[G]): Functor[Lambda[X => F[G[X]]]] =
+    new Functor[Lambda[X => F[G[X]]]] {
+      def map[A, B](fga: F[G[A]])(f: A => B) : F[G[B]] =
+        self.map(fga)(ga => G.map(ga)(a => f(a)))
+  }
 }
 
 trait FunctorLaws {
@@ -55,5 +61,10 @@ object FunctorTest {
     val f3 = implicitly[Functor[Int => ?]]
     val r1 = f3.map(_ + 1)(_ + 2)
     println(r1(3))
+
+    val f4 = f1 compose f2
+    val xs:List[Option[Int]] = List(Some(1), Some(2))
+
+    println(f4.map(xs)((_:Int) + 1))
   }
 }
