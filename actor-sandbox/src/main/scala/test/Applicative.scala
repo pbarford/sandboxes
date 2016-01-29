@@ -1,6 +1,6 @@
 package test
 
-trait Applicative[F[_]] extends Functor[F] {
+trait Applicative[F[_]] extends Functor[F] { self =>
 
   def pure[A](a:A):F[A]
 
@@ -39,6 +39,18 @@ trait Applicative[F[_]] extends Functor[F] {
 
   def tuple3[A,B,C](fa:F[A], fb:F[B], fc: F[C]):F[(A, B, C)] =
     map3(fa, fb, fc)((a,b, c) => (a,b,c))
+
+  def flip[A,B](ff: F[A => B]):F[A] => F[B] = fa => apply(fa)(ff)
+
+  def compose[G[_]](implicit G: Applicative[G]): Applicative[Lambda[X => F[G[X]]]] =
+    new Applicative[Lambda[X => F[G[X]]]] {
+      def pure[A](a:A):F[G[A]] = self.pure(G.pure(a))
+
+      def apply[A,B](fga: F[G[A]])(ff: F[G[A => B]]):F[G[B]] = {
+        val x: F[G[A] => G[B]] = self.map(ff)(gab => G.flip(gab))
+        self.apply(fga)(x)
+      }
+    }
 }
 
 object Applicative {
@@ -64,12 +76,25 @@ object Applicative {
     }
   }
 }
+trait ApplicativeLaws {
+
+  def applicativeIdentity[F[_], A](fa: F[A])(implicit F: Applicative[F]) =
+    F.apply(fa)(F.pure((a:A) => a)) == fa
+
+  /*
+  def applicativeHomomorphism[A,B](a:A, f: A => B) =
+    F.pure(a).apply(F.pure(f)) == F.pure(f(a))
+*/
+}
+
 
 object ApplicativeTest {
 
   def main (args: Array[String]) {
     val a1 = Applicative.optionApplicative
     val a2 = Applicative.listApplicative
+
+    val a3 = a2 compose a1
 
     println(a1.map(Some(1))(_ + 1))
     println(a2.map(List(1,2,3))(_ + 1))
@@ -81,5 +106,8 @@ object ApplicativeTest {
     println(a1.map6(Option(2), Option(4), Option(1), Option(2), Option(2), Option(2))(_ + _ + _ + _ + _ + _))
     println(a1.tuple2(Option(2), Option(4)))
     println(a1.tuple3(Option(2), Option(4), Option(2)))
+
+    val xs:List[Option[Int]] = List(Some(1), Some(2))
+    println(a3.map(xs)(_  + 1))
   }
 }
