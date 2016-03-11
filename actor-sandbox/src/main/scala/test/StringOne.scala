@@ -1,6 +1,6 @@
 package test
 
-class StringOne extends Process[String, String] {
+class StringOne extends AProcess[String, String] {
   override def on(msg: String) = {
     if(msg == "drop")
       discard(s"dropping : $msg")

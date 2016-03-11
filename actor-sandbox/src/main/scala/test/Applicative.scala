@@ -56,6 +56,7 @@ trait Applicative[F[_]] extends Functor[F] { self =>
 object Applicative {
 
   implicit val optionApplicative:Applicative[Option] = new Applicative[Option] {
+
     override def pure[A](a: A): Option[A] = Some(a)
 
     override def apply[A, B](fa: Option[A])(ff: Option[(A) => B]): Option[B] = (fa, ff) match {
@@ -109,5 +110,7 @@ object ApplicativeTest {
 
     val xs:List[Option[Int]] = List(Some(1), Some(2))
     println(a3.map(xs)(_  + 1))
+
+    println
   }
 }

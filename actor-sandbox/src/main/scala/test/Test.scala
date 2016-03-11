@@ -1,5 +1,7 @@
 package test
 
+
+
 object Test {
 
   val stringOne = new StringOne()
