@@ -1,8 +1,5 @@
 package com.paddypower.destmgmt
 
-import com.datastax.driver.core.querybuilder.BuiltStatement
-import com.paddypower.destmgmt.State.Statements
-
 trait State[S, +A] {
   def run(initial: S): (S, A)
 
@@ -22,8 +19,6 @@ trait State[S, +A] {
 
 object State {
 
-  type Statements[+A] = State[List[BuiltStatement], A]
-
   def apply[S,A](f: S =>(S,A)): State[S,A] =
     new State[S,A] {
       def run(s: S) = f(s)
@@ -33,16 +28,4 @@ object State {
     State(s => (s, a))
 }
 
-trait CassandraBatch {
-  def add(bs:BuiltStatement): Statements[Int]
-}
 
-object StatefulCassandraBatch extends CassandraBatch {
-
-  override def add(bs: BuiltStatement): Statements[Int] = {
-    State { s:List[BuiltStatement] =>
-      val f = s.++(List(bs))
-      (f, f.length)
-    }
-  }
-}
