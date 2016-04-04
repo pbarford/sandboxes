@@ -15,7 +15,9 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.2.0",
   "org.scalaz" %% "scalaz-concurrent" % "7.2.0",
   "org.xerial" % "sqlite-jdbc" % "3.7.2",
-  "org.scalaz.stream" %% "scalaz-stream" % "0.7a"
+  "org.scalaz.stream" %% "scalaz-stream" % "0.7a",
+  "org.json4s" %% "json4s-native" % "3.3.0",
+  "com.rabbitmq" % "amqp-client" % "3.1.3"
 )
 
 resolvers ++= Seq(

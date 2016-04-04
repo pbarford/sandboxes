@@ -50,9 +50,9 @@ object Search {
 
   def main(args: Array[String]) {
     val e = And(Literal("raining"),
-              Many(Or(Literal("dogs"),
-                      Literal("cats"))))
+              Or(Literal("dogs"),
+                      Literal("cats")))
 
-    println(e.interpret("raining dorgs ddfds carts"))
+    println(e.interpret("raining dorgs ddfds ceats"))
   }
 }

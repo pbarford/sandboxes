@@ -20,11 +20,24 @@ import Constants.MatchDetailType._
 import Constants.MatchStatisticType._
 
 
+trait Descriptor {
+  def id: Integer
+  def action: String
+}
+
+trait Displayable {
+  def display: Boolean
+  def displayOrder: Integer
+}
+
+
 case class Event(id: Integer,
                  action: String,
                  eventDescriptor: EventDescriptor,
                  name:Option[String] = None,
-                 markets:Option[List[Market]] = None)
+                 display: Boolean = false,
+                 displayOrder: Integer = 1,
+                 markets:Option[List[Market]] = None) extends Descriptor with Displayable
 
 case class TEvent(id: Integer,
                   action: Action,
@@ -164,3 +177,10 @@ case class MatchDetails(participantAMatchDetails: List[MatchDetail], participant
 
 case class MatchStatistic(`type`: MatchStatisticType, participantA: Integer, participantB: Integer)
 case class ToteBetting(forecastAvailable: Boolean, tricastAvailable: Boolean, dividends: List[Dividend])
+
+
+object EventTest {
+  def main(args: Array[String]) {
+    val e = new Event(1, "test", EventDescriptor(1, 1))
+  }
+}
