@@ -13,6 +13,7 @@ object DB {
     def flatMap[B](f: A => DB[B]):DB[B] = {
       new DB(c => f(x(c))(c))
     }
+
   }
 
   def pure[A](a: A):DB[A] = DB(c => a)

@@ -1,16 +1,29 @@
 package stock
 
+import java.text.SimpleDateFormat
+
+import com.datastax.driver.core.Session
 import com.ning.http.client.{ProxyServer, Response, AsyncCompletionHandler, AsyncHttpClient}
+import stock.Cassandra.{Cassandra, CassandraProvider}
 
 import scalaz._
 
 import scalaz.concurrent._
 import scalaz.stream._
 import scalaz.stream.Cause._
+import com.datastax.driver.core.Cluster
+
 
 object Ticker {
 
   private val client = new AsyncHttpClient
+  private val dtf1 = new SimpleDateFormat("yyyy.MM.dd")
+  private val dtf2 = new SimpleDateFormat("HH:mm:ss.SSS")
+  private val session:Session = Cluster.builder().addContactPoint("127.0.0.1").build().connect("stocks")
+  private val stmt = session.prepare("insert into quotes (symbol, trading_date, quote_timestamp, time, bid, ask, exchange) values (?, ?, ?, ?, ?, ?, ?);")
+  implicit val cassandraProvider = new CassandraProvider {
+    override def apply[A](f: Cassandra[A]): A = f(session)
+  }
 
   case class HttpResponse(query:Query)
   case class Query(count:Int, created:String, results: Result)
@@ -39,10 +52,40 @@ object Ticker {
 
   def read():Process[Task, Quote] = {
     Process.repeatEval (
-      Option(get("\"PPB.L\"")
+      Option(get("\"AAPL\"")
         .flatMap (resp => transform(resp.getResponseBody)).map(quote => quote))
         .getOrElse(throw Terminated(End))
     )
+  }
+
+  def date():(Long, String, String) = {
+    val time = System.currentTimeMillis()
+    val dte = new java.util.Date(time)
+    (time, dtf1.format(dte), dtf2.format(dte))
+  }
+
+  def insertQuote(quote:Quote):Session => Unit = {
+    s => {
+      val dte = date()
+      s.execute(stmt.bind(quote.Symbol,
+                          dte._2,
+                          java.lang.Long.valueOf(dte._1),
+                          dte._3,
+                          quote.Bid,
+                          quote.Ask,
+                          quote.StockExchange))
+    }
+  }
+
+  def cassandraWriter(implicit ca:CassandraProvider): Sink[Task, Quote] = {
+    Process.repeatEval {
+      Task.delay {
+        quote: Quote =>
+          Task.delay {
+            ca(insertQuote(quote))
+          }
+      }
+    }
   }
 
   def transform(body:String):Task[Quote] = {
@@ -54,8 +97,7 @@ object Ticker {
   }
 
   def process():Process[Task, Unit] = {
-    val out = io.stdOutLines
-    read.repeat.map(quote => quote.toString) to out
+    read.repeat.map(quote => quote) to cassandraWriter
   }
 
   def main(args: Array[String]) {
