@@ -5,11 +5,12 @@ import java.text.SimpleDateFormat
 import com.datastax.driver.core.Session
 import com.ning.http.client.{ProxyServer, Response, AsyncCompletionHandler, AsyncHttpClient}
 import stock.Cassandra.{Cassandra, CassandraProvider}
-
+import scala.concurrent.duration._
 import scalaz._
 
 import scalaz.concurrent._
 import scalaz.stream._
+import time._
 import scalaz.stream.Cause._
 import com.datastax.driver.core.Cluster
 
@@ -51,11 +52,22 @@ object Ticker {
   }
 
   def read():Process[Task, Quote] = {
+    implicit val sc = new java.util.concurrent.ScheduledThreadPoolExecutor(1)
+    awakeEvery(3 second) flatMap {
+      _ =>
+        Process.eval(
+          Option(get("\"AAPL\"")
+            .flatMap(resp => transform(resp.getResponseBody)).map(quote => quote))
+            .getOrElse(throw Terminated(End))
+        )
+    }
+/*
     Process.repeatEval (
-      Option(get("\"AAPL\"")
-        .flatMap (resp => transform(resp.getResponseBody)).map(quote => quote))
-        .getOrElse(throw Terminated(End))
-    )
+        Option(get("\"AAPL\"")
+          .flatMap(resp => transform(resp.getResponseBody)).map(quote => quote))
+          .getOrElse(throw Terminated(End))
+
+    )*/
   }
 
   def date():(Long, String, String) = {
@@ -97,7 +109,7 @@ object Ticker {
   }
 
   def process():Process[Task, Unit] = {
-    read.repeat.map(quote => quote) to cassandraWriter
+    read.repeat to cassandraWriter
   }
 
   def main(args: Array[String]) {
