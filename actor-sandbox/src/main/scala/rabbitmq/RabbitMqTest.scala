@@ -113,7 +113,6 @@ object RabbitMqTest {
     } map {
       m => m.ack()
     }
-
   }
 
   def process3(queueName:String)(implicit ch:com.rabbitmq.client.Channel):Process[Task, Unit] = {
