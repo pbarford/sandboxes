@@ -18,10 +18,13 @@ import com.datastax.driver.core.Cluster
 object Ticker {
 
   private val client = new AsyncHttpClient
-  private val dtf1 = new SimpleDateFormat("yyyy.MM.dd")
+
+  private val dtf1 = new SimpleDateFormat("yyyy-MMM-dd")
   private val dtf2 = new SimpleDateFormat("HH:mm:ss.SSS")
+
   private val session:Session = Cluster.builder().addContactPoint("127.0.0.1").build().connect("stocks")
   private val stmt = session.prepare("insert into quotes (symbol, trading_date, quote_timestamp, time, bid, ask, exchange) values (?, ?, ?, ?, ?, ?, ?);")
+
   implicit val cassandraProvider = new CassandraProvider {
     override def apply[A](f: Cassandra[A]): A = f(session)
   }
@@ -53,7 +56,7 @@ object Ticker {
 
   def read():Process[Task, Quote] = {
     implicit val sc = new java.util.concurrent.ScheduledThreadPoolExecutor(1)
-    awakeEvery(3 second) flatMap {
+    awakeEvery(60 second) flatMap {
       _ =>
         Process.eval(
           Option(get("\"AAPL\"")

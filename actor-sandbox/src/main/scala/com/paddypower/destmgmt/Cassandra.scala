@@ -1,6 +1,5 @@
 package com.paddypower.destmgmt
 
-
 import com.datastax.driver.core.{ResultSet, Session}
 import com.datastax.driver.core.querybuilder.{QueryBuilder, BuiltStatement}
 import com.google.common.util.concurrent.{FutureCallback, Futures}

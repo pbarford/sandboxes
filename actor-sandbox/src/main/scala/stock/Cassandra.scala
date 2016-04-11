@@ -2,7 +2,6 @@ package stock
 
 import com.datastax.driver.core.{Statement, Session}
 
-
 object Cassandra {
   case class Cassandra[A](s: Session => A) {
     def apply(x:Session) = s(x)
@@ -13,7 +12,6 @@ object Cassandra {
     def flatMap[B](f: A => Cassandra[B]):Cassandra[B] = {
       new Cassandra(c => f(s(c))(c))
     }
-
   }
 
   def pure[A](a: A):Cassandra[A] = Cassandra(c => a)
