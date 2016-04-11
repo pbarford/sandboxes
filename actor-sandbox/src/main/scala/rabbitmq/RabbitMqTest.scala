@@ -136,7 +136,6 @@ object RabbitMqTest {
   }
 
   def process4(queueName:String)(implicit ch:com.rabbitmq.client.Channel):Process[Task, Unit]= {
-
     read4(queueName).repeat observe outputSink to acknowledgeSink
   }
 
