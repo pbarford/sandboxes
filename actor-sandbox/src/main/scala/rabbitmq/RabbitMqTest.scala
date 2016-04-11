@@ -8,7 +8,7 @@ object RabbitMqTest {
 
   val q = async.unboundedQueue[Message2]
 
-  case class Message(deliveryTag:Long, data:String)
+  case class Message1(deliveryTag:Long, data:String)
 
   case class Message2(data:String, ack: () => Unit, nack: () => Unit)
   case class Message3(data:String, ack: Boolean => Unit)
@@ -24,10 +24,10 @@ object RabbitMqTest {
     cf.newConnection()
   }
 
-  def read(queueName:String)(implicit ch:com.rabbitmq.client.Channel): Process[Task, Message] = {
+  def read1(queueName:String)(implicit ch:com.rabbitmq.client.Channel): Process[Task, Message1] = {
     Process.repeatEval ( Task.delay {
       Option(ch.basicGet(queueName, false))
-          .map(msg => Message(msg.getEnvelope.getDeliveryTag, new String(new String(msg.getBody, "UTF-8"))))
+          .map(msg => Message1(msg.getEnvelope.getDeliveryTag, new String(new String(msg.getBody, "UTF-8"))))
           .getOrElse(throw Terminated(End))
 
     })
@@ -85,7 +85,7 @@ object RabbitMqTest {
     }
   }
 
-  def outMessage(m:Message4) : Task[Unit] = Task delay { println(m.data)}
+  def outMessage1(m:Message4) : Task[Unit] = Task delay { println(m.data)}
   def outMessage2(m:Message3) : Task[Unit] = Task delay {
     println(m.data)
     m.ack(true)
@@ -97,7 +97,7 @@ object RabbitMqTest {
   }
 
   def acknowledgeSink():Sink[Task, Message4] = Process.constant(handleMessage _)
-  def outputSink():Sink[Task, Message4] = Process.constant(outMessage _)
+  def outputSink():Sink[Task, Message4] = Process.constant(outMessage1 _)
 
   def outputSink2():Sink[Task, Message3] = Process.constant(outMessage2)
 
@@ -107,9 +107,9 @@ object RabbitMqTest {
   }
 
 
-  def process(queueName:String)(implicit ch:com.rabbitmq.client.Channel):Process[Task, Unit] = {
+  def process1(queueName:String)(implicit ch:com.rabbitmq.client.Channel):Process[Task, Unit] = {
 
-    read(queueName).repeat map { m => println(m.data)
+    read1(queueName).repeat map { m => println(m.data)
       m
     } map { m => ch.basicAck(m.deliveryTag, false)
     }
@@ -130,14 +130,13 @@ object RabbitMqTest {
     }
   }
 
+  def process3a(queueName:String)(implicit ch:com.rabbitmq.client.Channel):Process[Task, Unit]= {
+    read3(queueName).repeat.map { m:Message3 => m } to outputSink2
+  }
+
   def process4(queueName:String)(implicit ch:com.rabbitmq.client.Channel):Process[Task, Unit]= {
 
     read4(queueName).repeat.map { m:Message4 => m } observe outputSink to acknowledgeSink
-  }
-
-  def process3a(queueName:String)(implicit ch:com.rabbitmq.client.Channel):Process[Task, Unit]= {
-
-    read3(queueName).repeat.map { m:Message3 => m } to outputSink2
   }
 
   def main(args: Array[String]) {
@@ -148,19 +147,6 @@ object RabbitMqTest {
     finally {
       ch.close()
     }
-
-/*
-    val msgs = try {
-      read("test").chunkAll.runLast.run.getOrElse(Vector[Message]())
-    }
-    finally {
-      ch.close()
-    }
-
-    for (msg <- msgs) {
-      println(msg.data)
-    }
-*/
   }
 
 }
