@@ -36,13 +36,6 @@ object RabbitMqTest {
 
 
   def read2(queueName:String)(implicit ch:com.rabbitmq.client.Channel): Process[Task, Message2] = {
-    /*
-    Process.repeatEval (
-      q enqueueOne Option(ch.basicGet(queueName, false))
-      .map(msg => Message2(new String(new String(msg.getBody, "UTF-8")), () => ack(ch, msg.getEnvelope.getDeliveryTag)))
-      .getOrElse(throw Terminated(End))
-    )
-    */
 
     Process.repeatEval ( Task.delay {
       Option(ch.basicGet(queueName, false))
@@ -93,6 +86,10 @@ object RabbitMqTest {
   }
 
   def outMessage(m:Message4) : Task[Unit] = Task delay { println(m.data)}
+  def outMessage2(m:Message3) : Task[Unit] = Task delay {
+    println(m.data)
+    m.ack(true)
+  }
 
   def handleMessage(m:Message4) : Task[Unit] = Task delay {
     println(s"acking [${m.deliveryTag}]")
@@ -101,6 +98,8 @@ object RabbitMqTest {
 
   def acknowledgeSink():Sink[Task, Message4] = Process.constant(handleMessage _)
   def outputSink():Sink[Task, Message4] = Process.constant(outMessage _)
+
+  def outputSink2():Sink[Task, Message3] = Process.constant(outMessage2)
 
   def nack(channel: com.rabbitmq.client.Channel, deliveryTag: Long): Unit =  {
     println(s"nacking [$deliveryTag]")
@@ -136,10 +135,15 @@ object RabbitMqTest {
     read4(queueName).repeat.map { m:Message4 => m } observe outputSink to acknowledgeSink
   }
 
+  def process3a(queueName:String)(implicit ch:com.rabbitmq.client.Channel):Process[Task, Unit]= {
+
+    read3(queueName).repeat.map { m:Message3 => m } to outputSink2
+  }
+
   def main(args: Array[String]) {
     implicit val ch = connect.createChannel()
     try {
-      process4("test").run.unsafePerformSyncAttempt
+      process3a("test").run.unsafePerformSyncAttempt
     }
     finally {
       ch.close()
