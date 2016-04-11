@@ -9,10 +9,8 @@ object RabbitMqTest {
   val q = async.unboundedQueue[Message2]
 
   case class Message1(deliveryTag:Long, data:String)
-
   case class Message2(data:String, ack: () => Unit, nack: () => Unit)
   case class Message3(data:String, ack: Boolean => Unit)
-
   case class Message4(data:String, deliveryTag:Long, ch:com.rabbitmq.client.Channel)
 
   def connect:Connection = {
@@ -32,8 +30,6 @@ object RabbitMqTest {
 
     })
   }
-
-
 
   def read2(queueName:String)(implicit ch:com.rabbitmq.client.Channel): Process[Task, Message2] = {
 
@@ -106,37 +102,42 @@ object RabbitMqTest {
     channel.basicNack(deliveryTag, false, false)
   }
 
-
   def process1(queueName:String)(implicit ch:com.rabbitmq.client.Channel):Process[Task, Unit] = {
 
-    read1(queueName).repeat map { m => println(m.data)
+    read1(queueName).repeat map {
+      m => println(m.data)
       m
-    } map { m => ch.basicAck(m.deliveryTag, false)
+    } map {
+      m => ch.basicAck(m.deliveryTag, false)
     }
   }
 
   def process2(queueName:String)(implicit ch:com.rabbitmq.client.Channel):Process[Task, Unit] = {
-    read2(queueName).repeat map { m => println(m.data)
+    read2(queueName).repeat map {
+      m => println(m.data)
       m
-    } map { m => m.ack()
+    } map {
+      m => m.ack()
     }
 
   }
 
   def process3(queueName:String)(implicit ch:com.rabbitmq.client.Channel):Process[Task, Unit] = {
-    read3(queueName).repeat map { m => println(m.data)
+    read3(queueName).repeat map {
+      m => println(m.data)
       m
-    } map { m => m.ack(true)
+    } map {
+      m => m.ack(true)
     }
   }
 
   def process3a(queueName:String)(implicit ch:com.rabbitmq.client.Channel):Process[Task, Unit]= {
-    read3(queueName).repeat.map { m:Message3 => m } to outputSink2
+    read3(queueName).repeat to outputSink2
   }
 
   def process4(queueName:String)(implicit ch:com.rabbitmq.client.Channel):Process[Task, Unit]= {
 
-    read4(queueName).repeat.map { m:Message4 => m } observe outputSink to acknowledgeSink
+    read4(queueName).repeat observe outputSink to acknowledgeSink
   }
 
   def main(args: Array[String]) {
