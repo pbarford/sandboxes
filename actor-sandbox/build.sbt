@@ -17,7 +17,9 @@ libraryDependencies ++= Seq(
   "org.xerial" % "sqlite-jdbc" % "3.7.2",
   "org.scalaz.stream" %% "scalaz-stream" % "0.7a",
   "org.json4s" %% "json4s-native" % "3.3.0",
-  "com.rabbitmq" % "amqp-client" % "3.1.3"
+  "com.rabbitmq" % "amqp-client" % "3.1.3",
+  "org.elasticsearch" % "elasticsearch" % "2.3.1",
+  "org.spire-math" %% "algebra" % "0.3.1"
 )
 
 resolvers ++= Seq(

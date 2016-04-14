@@ -42,8 +42,27 @@ object Cassandra {
     }
   }
 
+  private def selectAsync(statement:BuiltStatement):Session => Task[ResultSet] = {
+    session => {
+      Task.async {
+        register =>
+          Futures.addCallback(session.executeAsync(statement), new FutureCallback[ResultSet] {
+            override def onFailure(t: Throwable): Unit = {
+              println(t.getMessage)
+              register(-\/(t))
+            }
+            override def onSuccess(results: ResultSet): Unit = register(\/- (results))
+          })
+      }
+    }
+  }
+
   def executeAsyncStatement(statement:BuiltStatement):Session => Task[Unit] = {
     executeAsync(statement)
+  }
+
+  def executeAsyncSelect(statement:BuiltStatement):Session => Task[ResultSet] = {
+    selectAsync(statement)
   }
 
   def executeBatchAsync(statements:Seq[BuiltStatement]):Session => Task[Unit] = {
