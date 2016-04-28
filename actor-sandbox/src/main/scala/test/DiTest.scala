@@ -1,60 +1,107 @@
 package test
 
+import scalaz.Reader
 
-object DiTest {
+case class User(id:Int,
+                firstName:String,
+                lastName:String,
+                email:String,
+                supervisorId:Int)
 
-  case class Config(host: String, port: Int) {
-    def prettyPrint(prefix: String, msg: String): String =
-      List(prefix, ": ", msg, " on ", host, ":", port.toString).mkString
+trait UserRepository {
+  def get(id:Int):User
+  def find(name:String):User
+}
+
+trait Users {
+  import scalaz.Reader
+
+  def getUser(id: Int) = Reader((userRepository: UserRepository) =>
+    userRepository.get(id)
+  )
+
+  def findUser(username: String) = Reader((userRepository: UserRepository) =>
+    userRepository.find(username)
+  )
+}
+
+object UserInfo extends Users {
+
+  def userEmail(id: Int) = {
+    getUser(id) map (_.email)
   }
 
-  class ReaderMonad[C, A](g: C => A) {
+  def userInfo(username: String) =
+    for {
+      user <- findUser(username)
+      boss <- getUser(user.supervisorId)
+    } yield Map(
+      "fullName" -> s"${user.firstName} ${user.lastName}",
+      "email" -> s"${user.email}",
+      "boss" -> s"${boss.firstName} ${boss.lastName}"
+    )
+}
 
-    def apply(c: C) = g(c)
+object UserRepositoryImpl extends UserRepository {
+  override def get(id: Int): User = User(id, "test", "tester", "test.tester@test.com", id + 2)
 
-    def map[B](f: A => B): ReaderMonad[C, B] =
-      new ReaderMonad(c => f(g(c)))
+  override def find(name: String): User = User(10, name, "tester", s"$name.tester@test.com", 12)
+}
 
+trait TestUserRepository extends UserRepository {
+  override def get(id: Int): User = User(id, "big", "tester", "big.tester@test.com", id + 2)
 
-    def flatMap[B](f: A => ReaderMonad[C, B]): ReaderMonad[C, B] =
-      new ReaderMonad(c => f(g(c))(c))
+  override def find(name: String): User = User(10, name, "tester", s"$name.tester@test.com", 12)
+}
 
-    def pure[A](a :A): C => A = c => a
+object TestApplication extends Application(UserRepositoryImpl)
 
+class Application(userRepository: UserRepository) extends Users {
+  def userEmail(id: Int) = {
+    run(UserInfo.userEmail(id))
   }
 
-  object ReaderMonad {
-    def apply[A, B](b: B) =
-      new ReaderMonad[A, B](a => b)
-
-    def ask[A]: ReaderMonad[A, A] =
-      new ReaderMonad(identity)
+  def userInfo(username: String) =  {
+    run(UserInfo.userInfo(username))
   }
 
-  type ConfigReader[A] = ReaderMonad[Config, A]
-
-  private def doStuff(prefix: String, msg: String): ConfigReader[String] =
-    ReaderMonad.ask.map(_.prettyPrint(prefix, msg))
-
-  private def doCoolStuff(msg: String): ConfigReader[String] =
-    doStuff("cool", msg)
-
-  private def doMoreStuff(msg: String): ConfigReader[String] =
-    doStuff("more", msg)
-
-  def run() {
-    val config = Config("somehost.com", 1337)
-    val doAllTheStuff = for {
-      cool <- doCoolStuff("foo")
-      more <- doMoreStuff("bar")
-    } yield List(cool, more)
-
-
-    // execute all functions with one configuration
-    doAllTheStuff(config).foreach(println)
+  private def run[A](reader: Reader[UserRepository, A]): String = {
+    String.valueOf(reader(userRepository))
   }
+}
+
+trait Application2 extends Users with TestUserRepository {
+  this: UserRepository =>
+  def userEmail(id: Int) = {
+    run(UserInfo.userEmail(id))
+  }
+
+  def userInfo(username: String) =  {
+    run(UserInfo.userInfo(username))
+  }
+
+  private def run[A](reader: Reader[UserRepository, A]): String = {
+    String.valueOf(reader(this))
+  }
+}
+
+object DITest extends Application2 {
 
   def main(args: Array[String]) {
-    run()
+
+    println(TestApplication.userEmail(12))
+    println(TestApplication.userInfo("paulo"))
+
+    println(userEmail(34))
+    println(userInfo("alexandra"))
+
+    /*
+    val triple = Reader((i: Int) => i * 3)
+    println(triple(3))   // => 9
+    val thricePlus2 = triple map (i => i + 2)
+    println(thricePlus2(3))  // => 11
+    val f = for (i <- thricePlus2) yield i.toString
+    println(f(3))
+    */
   }
 }

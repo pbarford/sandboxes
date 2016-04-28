@@ -19,7 +19,8 @@ libraryDependencies ++= Seq(
   "org.json4s" %% "json4s-native" % "3.3.0",
   "com.rabbitmq" % "amqp-client" % "3.1.3",
   "org.elasticsearch" % "elasticsearch" % "2.3.1",
-  "org.spire-math" %% "algebra" % "0.3.1"
+  "org.spire-math" %% "algebra" % "0.3.1",
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.2"
 )
 
 resolvers ++= Seq(
