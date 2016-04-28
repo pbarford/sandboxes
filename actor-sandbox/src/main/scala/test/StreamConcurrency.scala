@@ -6,7 +6,6 @@ import scalaz.stream._
 
 object StreamConcurrency {
 
-
   val fetchPage :Int => Task[String] = (n => Task delay(s"fetched $n"))
   val fetchChannel = Process.constant(fetchPage)
 
@@ -72,7 +71,7 @@ object StreamConcurrency {
   def main(args: Array[String]) {
 
     val z = ns through fetchChannel
-    println(z.runLog.run)
+    println(z.runLog.unsafePerformSync)
 
     val s = p.runLog.unsafePerformSyncAttempt match {
       case -\/(t) => println(t.getMessage)
