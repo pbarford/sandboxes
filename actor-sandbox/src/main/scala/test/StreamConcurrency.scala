@@ -7,7 +7,7 @@ import scalaz.stream._
 object StreamConcurrency {
 
 
-  val fetchPage : Int => Task[String] = (n => Task delay(s"fetched $n"))
+  val fetchPage :Int => Task[String] = (n => Task delay(s"fetched $n"))
   val fetchChannel = Process.constant(fetchPage)
 
   def fetch(n:Int):Task[String] =
