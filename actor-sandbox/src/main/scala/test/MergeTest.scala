@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.{SerializationFeature, DeserializationFeat
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 
+import scala.annotation.tailrec
+
 
 object MergeTest {
 
@@ -31,18 +33,24 @@ object MergeTest {
     println(anyToJsonString(merge(m1, m2)))
   }
 
-  def merge[K, V](m1:Map[K, V], m2:Map[K, V]):Map[K, Any] =
-    (m1.keySet ++ m2.keySet) map {
-      i => i -> {
-        (m1.get(i), m2.get(i)) match {
-          case (Some(v1:List[Map[K,Any]]), Some(v2:List[Map[K,Any]])) => v1.zip(v2) map { e => merge(e._1, e._2) }
-          case (Some(v1:Map[K,Any]), Some(v2:Map[K,Any])) => merge(v1, v2)
-          case (Some(v1:Any), Some(v2:Any)) => v2
-          case (None, Some(v2:Any)) => v2
-          case (Some(v1:Any), None) => v1
+
+  def merge[K, V](m1:Map[K, V], m2:Map[K, V]):Map[K, Any] = {
+    def go[K, V](m1:Map[K, V], m2:Map[K, V]):Map[K, Any] = {
+      (m1.keySet ++ m2.keySet) map {
+        i => i -> {
+          (m1.get(i), m2.get(i)) match {
+            case (Some(v1: List[Map[K, Any]]), Some(v2: List[Map[K, Any]])) => v1.zip(v2) map { e => go(e._1, e._2) }
+            case (Some(v1: Map[K, Any]), Some(v2: Map[K, Any])) => go(v1, v2)
+            case (Some(v1: Any), Some(v2: Any)) => v2
+            case (None, Some(v2: Any)) => v2
+            case (Some(v1: Any), None) => v1
+          }
         }
-      }
-    } toMap
+      } toMap
+    }
+    go(m1, m2)
+
+  }
 
   private def toMap(data:String):Map[String,Any] = {
     mapper.readValue[Map[String,Any]](data)
