@@ -4,7 +4,7 @@ import com.datastax.driver.core.{ResultSet, Session}
 import com.datastax.driver.core.querybuilder.{QueryBuilder, BuiltStatement}
 import com.google.common.util.concurrent.{FutureCallback, Futures}
 
-import scalaz.{\/-, -\/}
+import scalaz.{\/, \/-, -\/}
 import scalaz.concurrent.Task
 
 object Cassandra {
@@ -34,25 +34,41 @@ object Cassandra {
     session => {
       Task.async {
         register =>
+          /*
           Futures.addCallback(session.executeAsync(statement), new FutureCallback[ResultSet] {
             override def onFailure(t: Throwable): Unit = register(-\/(t))
             override def onSuccess(result: ResultSet): Unit = register(\/-())
           })
+          */
+          Futures.addCallback(session.executeAsync(statement), toHandlerUnit(register))
+
       }
     }
+  }
+
+  def toHandlerUnit(k: (Throwable \/ Unit) => Unit) = new FutureCallback[ResultSet] {
+    override def onFailure(t: Throwable): Unit = k(-\/ (t))
+    override def onSuccess(v: ResultSet): Unit = k(\/- (v))
+  }
+
+  def toHandlerResultSet(k: (Throwable \/ ResultSet) => Unit) = new FutureCallback[ResultSet] {
+    override def onFailure(t: Throwable): Unit = k(-\/ (t))
+    override def onSuccess(v: ResultSet): Unit = k(\/- (v))
   }
 
   private def selectAsync(statement:BuiltStatement):Session => Task[ResultSet] = {
     session => {
       Task.async {
         register =>
+          /*
           Futures.addCallback(session.executeAsync(statement), new FutureCallback[ResultSet] {
             override def onFailure(t: Throwable): Unit = {
-              println(t.getMessage)
               register(-\/(t))
             }
             override def onSuccess(results: ResultSet): Unit = register(\/- (results))
           })
+          */
+          Futures.addCallback(session.executeAsync(statement), toHandlerResultSet(register))
       }
     }
   }

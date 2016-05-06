@@ -45,6 +45,9 @@ object Import {
 
   def process():CassandraProvider => Unit = {
     cp => {
+
+
+
       val rs = cp(executeAsyncSelect(get(4046739))).run
 
         while(!rs.isExhausted) {
@@ -74,16 +77,10 @@ object Import {
 
 class TrustAllManager extends X509ExtendedTrustManager {
   override def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String, socket: Socket): Unit = {}
-
   override def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String, sslEngine: SSLEngine): Unit = {}
-
   override def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String, socket: Socket): Unit = {}
-
   override def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String, sslEngine: SSLEngine): Unit = {}
-
   override def getAcceptedIssuers: Array[X509Certificate] = null
-
   override def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
-
   override def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
 }

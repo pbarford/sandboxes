@@ -1,7 +1,7 @@
 package test
 
 import scalaz.Reader
-
+/*
 case class User(id:Int,
                 firstName:String,
                 lastName:String,
@@ -104,4 +104,7 @@ object DITest extends Application2 {
     println(f(3))
     */
   }
+
+
 }
+  */
