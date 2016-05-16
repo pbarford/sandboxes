@@ -7,6 +7,7 @@ import com.paddypower.destmgmt.Cassandra.CassandraProvider
 import com.paddypower.destmgmt.Cassandra._
 
 import scalaz.{\/, \/-, -\/}
+import scalaz.Scalaz._
 
 case class Snapshot(uptoSeqNo:Int)
 
@@ -16,19 +17,26 @@ class EventSource(correlationKey:String) {
     cp => {
       val r = for {
         s <- getSnapshot(cp)
-        es <- getEvents(s)(cp)
+        es <- getEvents(Some(s))(cp)
       } yield es
 
-      println(r)
+      r match {
+        case -\/(t) => getEvents(None)(cp)
+        case _ => println(r)
+      }
     }
   }
 
   def persist = {
   }
 
-  private def getEvents(s: Snapshot)(implicit cp :CassandraProvider): String \/ Seq[Int] = {
-    val statement = selectEventsFromSeqNo(s.uptoSeqNo)
-    \/-(Seq.empty[Int])
+  private def getEvents(s: Option[Snapshot])(implicit cp :CassandraProvider): String \/ Seq[Int] = {
+    val stmt = s match {
+      case Some(x:Snapshot) => selectEventsFromSeqNo(x.uptoSeqNo)
+      case None => selectEventsFromSeqNo(0)
+    }
+
+    Seq.empty[Int].right
   }
 
   private def getSnapshot(implicit cp :CassandraProvider): String \/ Snapshot = {
@@ -37,9 +45,9 @@ class EventSource(correlationKey:String) {
       case \/-(rs) => {
         rs.one match {
           case r: Row =>
-            \/-(Snapshot(r.getInt("uptoseqno")))
+            Snapshot(r.getInt("uptoseqno")).right
           case _ =>
-            -\/("not found")
+            "not found".left
         }
       }
     }
