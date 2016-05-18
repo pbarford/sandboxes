@@ -90,7 +90,7 @@ object EventSource {
 
   def main(args: Array[String]) {
 
-    val es = new EventSource("test.1234")
+    val es = new EventSource("test.12234")
     runInLocalDev(es.restore())
     println("ok")
   }
