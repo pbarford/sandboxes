@@ -63,13 +63,13 @@ object RabbitQTest {
     })
   }
 
-  def p(m:AmqpMessage) = {
+  def q(m:AmqpMessage) = {
     Process.eval(Task.now(m)) to enqueue(Seq(q1,q2,q3))
   }
 
   def read2(queueName:String)(implicit ch:com.rabbitmq.client.Channel): Process[Task, Unit] = {
     Process.eval ( Task.delay {
-      ch.basicConsume(queueName, false, new RabbitConsumer(m => p(m).run.unsafePerformSync))
+      ch.basicConsume(queueName, false, new RabbitConsumer(m => q(m).run.unsafePerformSync))
       ()
     })
   }
