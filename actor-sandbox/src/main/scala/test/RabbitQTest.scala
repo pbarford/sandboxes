@@ -27,7 +27,7 @@ object RabbitQTest {
   def enqueue(qs:Seq[async.mutable.Queue[AmqpMessage]]): Sink[Task, AmqpMessage] = sink.lift[Task,AmqpMessage] { m =>
     m.no.toInt % qs.size match {
       case i:Int =>
-        println(s"adding to $i")
+        println(s"adding ${m.no} to $i")
         qs(i).enqueueOne(m)
     }
   }
@@ -91,15 +91,10 @@ object RabbitQTest {
 
     implicit val ch = connect.createChannel()
     ch.basicQos(20)
-    try {
-      printMFlow.run.runAsync(_ => ())
-      add
-      process2("test").run.runAsync(_ => ())
-    }
-    finally {
-      //println("close")
-      //ch.close()
-    }
+    printMFlow.run.runAsync(_ => ())
+    add
+    process2("test").run.runAsync(_ => ())
+    
   }
 
   def add(implicit ch: com.rabbitmq.client.Channel) = {
