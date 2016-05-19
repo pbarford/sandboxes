@@ -94,7 +94,7 @@ object RabbitQTest {
     printMFlow.run.runAsync(_ => ())
     add
     process2("test").run.runAsync(_ => ())
-    
+
   }
 
   def add(implicit ch: com.rabbitmq.client.Channel) = {
