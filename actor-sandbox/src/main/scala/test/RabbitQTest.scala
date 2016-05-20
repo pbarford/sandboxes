@@ -27,7 +27,7 @@ object RabbitQTest {
   def enqueue(qs:Seq[async.mutable.Queue[AmqpMessage]]): Sink[Task, AmqpMessage] = sink.lift[Task,AmqpMessage] { m =>
     m.no.toInt % qs.size match {
       case i:Int =>
-        println(s"enqueue ${m.no} to $i")
+        println(s"${Thread.currentThread().getName} enqueue ${m.no} to $i")
         qs(i).enqueueOne(m)
     }
   }
@@ -35,7 +35,7 @@ object RabbitQTest {
   def ack(implicit ch:com.rabbitmq.client.Channel):Sink[Task, AmqpMessage] =
     sink.lift[Task,AmqpMessage] { m:AmqpMessage =>
       Task.delay {
-        println(s"acking ${m.no}")
+        println(s"${Thread.currentThread().getName} acking ${m.no}")
         ch.basicAck(m.no, false)
       }
     }
@@ -77,7 +77,6 @@ object RabbitQTest {
     processes.run.runAsync(_ => ())
     addMessages
     consume("test").run.runAsync(_ => ())
-
   }
 }
 
