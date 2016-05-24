@@ -1,9 +1,13 @@
 package test
 
+import java.util.concurrent.Executors
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.rabbitmq.client._
 import test.RabbitQTest.AmqpMessage
 
-import scalaz.concurrent.Task
+import scalaz.{-\/, \/, \/-}
+import scalaz.concurrent.{Strategy, Task}
 import scalaz.stream.Cause.{End, Terminated}
 import scalaz.stream.Process._
 import scalaz.stream.Process
@@ -11,24 +15,45 @@ import scalaz.stream._
 
 object RabbitQTest {
 
+  import ProcessExtras._
+
   case class AmqpMessage(no:Long, data:String)
 
-  val q1 = async.boundedQueue[AmqpMessage](1000)
-  val q2 = async.boundedQueue[AmqpMessage](1000)
-  val q3 = async.boundedQueue[AmqpMessage](1000)
+  val q1 = async.boundedQueue[AmqpMessage](10000)
+  val q2 = async.boundedQueue[AmqpMessage](10000)
+  val q3 = async.boundedQueue[AmqpMessage](10000)
+  val q4 = async.boundedQueue[AmqpMessage](10000)
+  val q5 = async.boundedQueue[AmqpMessage](10000)
+  val q6 = async.boundedQueue[AmqpMessage](10000)
+  val q7 = async.boundedQueue[AmqpMessage](10000)
+  val q8 = async.boundedQueue[AmqpMessage](10000)
+  val q9 = async.boundedQueue[AmqpMessage](10000)
+  val q10 = async.boundedQueue[AmqpMessage](10000)
 
   def processQ(q:async.mutable.Queue[AmqpMessage])(implicit ch:com.rabbitmq.client.Channel): Process[Task, Unit] = {
     for {
-      m <- q.dequeue
-      _ <- emit(m).toSource to ack
+      msg <- q.dequeue
+      validMsg <- checkMsg(msg) or logErrorAndAck(msg.no)
+      _ <- emit(validMsg).toSource to ack
     } yield ()
+  }
+
+  def logErrorAndAck(tag:Long)(implicit ch:com.rabbitmq.client.Channel): String => Process[Task, Nothing] =
+    msg => {
+      println(s"${Thread.currentThread().getName} logErrorAndAck [$msg] acking [${tag}]")
+      emit(ch.basicAck(tag, false)).drain
+  }
+
+  def checkMsg: AmqpMessage => Process[Task, String \/ AmqpMessage] = msg => {
+    msg.no % 10 match {
+      case 0 => Process.eval(Task.now(-\/("divisible by 10 error")))
+      case _ => Process.eval(Task.now(\/-(msg)))
+    }
   }
 
   def enqueue(qs:Seq[async.mutable.Queue[AmqpMessage]]): Sink[Task, AmqpMessage] = sink.lift[Task,AmqpMessage] { m =>
     m.no.toInt % qs.size match {
-      case i:Int =>
-        println(s"${Thread.currentThread().getName} enqueue ${m.no} to $i")
-        qs(i).enqueueOne(m)
+      case i: Int => qs(i).enqueueOne(m)
     }
   }
 
@@ -50,7 +75,7 @@ object RabbitQTest {
   }
 
   def qMsg(m:AmqpMessage) = {
-    Process.eval(Task.now(m)) to enqueue(Seq(q1,q2,q3))
+    Process.eval(Task.now(m)) to enqueue(Seq(q1,q2,q3,q4,q5,q6,q7,q8,q9,q10))
   }
 
   def consume(queueName:String)(implicit ch:com.rabbitmq.client.Channel): Process[Task, Unit] = {
@@ -60,23 +85,33 @@ object RabbitQTest {
     })
   }
 
-  def addMessages(implicit ch: com.rabbitmq.client.Channel) = {
-    for (i <- 1 to 1000)
-      ch.basicPublish("testFo", "", null, "etete".getBytes)
+  def addMessages(implicit ch: com.rabbitmq.client.Channel):Process[Task,Unit] = {
+    for {
+      i <- Process.range(1, 40000)
+      _ <- emit(ch.basicPublish("testFo", "", null, "etete".getBytes))
+
+    } yield ()
   }
 
   def main(args: Array[String]) {
-
     implicit val ch = connect.createChannel()
-    val p1 = processQ(q1)
-    val p2 = processQ(q2)
-    val p3 = processQ(q3)
-    val processes = merge.mergeN(3)(Process(p1,p2,p3))
-
-    ch.basicQos(20)
+    ch.basicQos(10000)
+    val tf = new ThreadFactoryBuilder().setNameFormat("rmq-thread-%d").build()
+    val pool = Executors.newFixedThreadPool(30, tf)
+    implicit val pS = Strategy.Executor(pool)
+    val processes = merge.mergeN(30)(Process(addMessages,
+                                             consume("test"),
+                                             processQ(q1),
+                                             processQ(q2),
+                                             processQ(q3),
+                                             processQ(q4),
+                                             processQ(q5),
+                                             processQ(q6),
+                                             processQ(q7),
+                                             processQ(q8),
+                                             processQ(q9),
+                                             processQ(q10)))
     processes.run.runAsync(_ => ())
-    addMessages
-    consume("test").run.runAsync(_ => ())
   }
 }
 
