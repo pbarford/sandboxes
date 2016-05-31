@@ -6,21 +6,26 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.rabbitmq.client.{AMQP, _}
 import test.SignalTest.{FeedMessage, Incident}
 
+import scala.concurrent.duration._
 import scala.collection.immutable.SortedSet
-import scalaz.{\/, \/-}
+import scalaz.{-\/, \/, \/-}
 import scalaz.concurrent.{Strategy, Task}
 import scalaz.stream.Cause.{End, Terminated}
-import scalaz.stream.{sink, _}
+import scalaz.stream._
 import scalaz.stream.Process._
+import scalaz.stream.time._
+import scalaz.stream.async.mutable.Signal
+import scalaz.stream.async.signalOf
 
 object SignalTest {
 
+  import ProcessExtras._
   case class FeedMessage(deliveryTag:Long, incident:Incident)
 
-  case class Incident(eventId:Long, feedSeqNo : Long, action:String) extends Ordered[Incident] {
+  case class Incident(eventId:Long, seqNo : Long, action:String) extends Ordered[Incident] {
     override def compare(that: Incident): Int = {
-      if (this.feedSeqNo == that.feedSeqNo) 0
-      else if (this.feedSeqNo > that.feedSeqNo) 1
+      if (this.seqNo == that.seqNo) 0
+      else if (this.seqNo > that.seqNo) 1
       else -1
     }
   }
@@ -42,11 +47,14 @@ object SignalTest {
       else -1
     }
   }
+  val tf = new ThreadFactoryBuilder().setNameFormat("rmq-thread-%d").build()
+  val pool = Executors.newFixedThreadPool(10, tf)
 
-  val pricingCalls = async.signalOf[Map[Long,SortedSet[PricingCall]]](Map.empty)
-  val currentPricingCalls = pricingCalls.continuous
+  implicit val pS = Strategy.Executor(pool)
+  implicit val sc = Executors.newScheduledThreadPool(1)
 
-  val pricingTicks = async.signalOf[SortedSet[PricingCall]](SortedSet.empty)
+  val pricingCalls:Signal[Map[Long,PricingCall]] = signalOf[Map[Long,PricingCall]](Map.empty)
+  val updatedPricingCalls: Process[Task, Map[Long, PricingCall]] = pricingCalls.discrete
 
   implicit class MapOps[Long,PricingCall](m :Map[Long, SortedSet[PricingCall]]) {
     def lastPricingCallFor(id:Long) = m.get(id).map(set => set.last)
@@ -69,6 +77,10 @@ object SignalTest {
     }
   }
 
+  def enqueueToQ(q:async.mutable.Queue[FeedMessage]): Sink[Task, FeedMessage] = sink.lift[Task,FeedMessage] { m =>
+    q.enqueueOne(m)
+  }
+
   def queueFeedMessage(m:FeedMessage) = {
     Process.eval(Task.now(m)) to enqueue(Seq(q1))
   }
@@ -80,34 +92,53 @@ object SignalTest {
     })
   }
 
-  def callPricing: (FeedMessage,
-                    Process[Task, Map[Long, SortedSet[PricingCall]]]) => Process[Task, String \/ FeedMessage] = (msg, pricingCalls) => {
+  def callPricing: FeedMessage => Process[Task, String \/ PricingCall] =
+    (msg) => {
+      println(s"${Thread.currentThread().getName} callPricing [$msg]")
+      msg.deliveryTag % 2 match {
+      case 0 =>
+        val pc = PricingCall(msg.incident.eventId, msg.incident.seqNo,  System.currentTimeMillis(), System.currentTimeMillis())
+        emit(\/-(pc)).toSource
 
-//    msg.no % 10 match {
-//      case 0 => Process.eval(Task.now(-\/("divisible by 10 error")))
-//      case _ => Process.eval(Task.now(\/-(msg)))
-//    }
-
-
-    emit(\/-(msg)).toSource
-
+      case _ => Process.eval(Task.now(-\/(s"($msg) skip call to pricing")))
+    }
   }
 
   def ack(implicit ch:com.rabbitmq.client.Channel):Sink[Task, FeedMessage] =
     sink.lift[Task,FeedMessage] { m:FeedMessage =>
       Task.delay {
-        println(s"${Thread.currentThread().getName} acking ${m.deliveryTag}")
-        ch.basicAck(m.deliveryTag, false)
+        if(m.deliveryTag !=0) {
+          println(s"${Thread.currentThread().getName} ack [${m.deliveryTag}]")
+          ch.basicAck(m.deliveryTag, false)
+        }
       }
     }
 
-  def processQ(q:async.mutable.Queue[FeedMessage],
-              currentPricingCalls:Process[Task, Map[Long, SortedSet[PricingCall]]])
+  def logMsgAndAck(tag:Long)(implicit ch:com.rabbitmq.client.Channel): String => Process[Task, Nothing] =
+    msg => {
+      println(s"${Thread.currentThread().getName} logMsgAndAck [$msg] ack [${tag}]")
+      emit(ch.basicAck(tag, false)).drain
+    }
+
+  def log[A]:Sink[Task,A] = sink.lift[Task,A] { msg =>
+    Task.delay { println(s"${Thread.currentThread().getName} log [$msg]") }
+  }
+
+  def setPricingCall(pricingCall: PricingCall) = {
+
+    pricingCalls.compareAndSet { m =>
+      println(s"${Thread.currentThread().getName} setPricingCall [$pricingCall]")
+      Some(m.get + (pricingCall.eventId -> pricingCall))
+    }
+  }
+
+  def processQ(q:async.mutable.Queue[FeedMessage])
              (implicit ch:com.rabbitmq.client.Channel): Process[Task, Unit] = {
     for {
-      feedMessage <- q.dequeue
-      pricingMessage <- callPricing(feedMessage,currentPricingCalls)
-      _ <- Process.eval(Task.delay(feedMessage)) to ack
+      feedMessage     <- q.dequeue
+      pricingCall     <- callPricing(feedMessage) or logMsgAndAck(feedMessage.deliveryTag)
+      _               <- eval(setPricingCall(pricingCall))
+      _               <- eval(Task.delay(feedMessage)) to ack
     } yield ()
   }
 
@@ -116,19 +147,41 @@ object SignalTest {
     implicit val ch = connect.createChannel()
     ch.basicQos(100)
 
-    val tf = new ThreadFactoryBuilder().setNameFormat("rmq-thread-%d").build()
-    val pool = Executors.newFixedThreadPool(10, tf)
-    implicit val pS = Strategy.Executor(pool)
-
     val m = Map[Long, SortedSet[PricingCall]](1L -> SortedSet(PricingCall(1L, 1L, 1L, 1L), PricingCall(1L, 1L, 1L, 2L)))
     println(m.lastPricingCallFor(1L))
     println(m.lastPricingCallFor(2L))
 
     val processes = merge.mergeN(30)(Process(consume("test"),
-                                     processQ(q1, currentPricingCalls)))
+                                     processQ(q1),
+                                     checker
+      ))
+
     processes.run.runAsync(_ => ())
+
+    awakeEvery(5 seconds).map(x => generateTick(x).run.unsafePerformSync).run.runAsync(_ => ())
+
+    awakeEvery(2 seconds).map(z => checker2(Some(z)).run.unsafePerformSync).run.runAsync(_ => ())
   }
 
+  def generateTick(z:Duration): Process[Task,Unit] = {
+    println(s"${Thread.currentThread().getName} generateTick [$z]")
+    val x = FeedMessage(0L, Incident(0L, 0L, "TICK"))
+    emit(x).toSource to enqueueToQ(q1)
+  }
+
+  def checker: Process[Task, Unit] = {
+    println (s"${Thread.currentThread().getName} checker")
+    for {
+      c <- updatedPricingCalls
+    } yield c.foreach {case (key, value) => println (s"${Thread.currentThread().getName} checker --> $key --> $value")}
+  }
+
+  def checker2(z:Option[Duration] = None): Process[Task, Unit] = {
+    println (s"${Thread.currentThread().getName} checker2 awoke @ [$z]")
+    for {
+      c:Map[Long,PricingCall] <- eval(pricingCalls.get)
+    } yield c.foreach {case (key, value) => println (s"${Thread.currentThread().getName} checker2 --> $key --> $value")}
+  }
 }
 
 class FeedConsumer(callback : FeedMessage => Unit)
