@@ -21,7 +21,7 @@ object JsonWriter {
     def convertToJson(expr: Expr): JsonValue = {
       expr match {
         case Number(v) => JsonNumber(v)
-        case Plus(l, r)  => JsonObject(Map("op" -> JsonString("-"),
+        case Plus(l, r)  => JsonObject(Map("op" -> JsonString("+"),
           "lhs" -> convertToJson(l),
           "rhs" -> convertToJson(r)))
         case Minus(l, r) => JsonObject(Map("op" -> JsonString("-"),
@@ -68,9 +68,11 @@ object TypeclassTest {
   }
 
   def test(): Unit = {
-    val e = Plus(Number(3), Number(4))
+    val e1 = Plus(Number(3), Number(4))
+    val e2 = Minus(Number(3), Number(4))
 
-    println(JsonWriter.write(e, JsonWriter.expressionJsonConvert))
+    println(JsonWriter.write(e1, JsonWriter.expressionJsonConvert))
+    println(JsonWriter.write(e2, JsonWriter.expressionJsonConvert))
     //println(JsonWriter.write2(e))
   }
 

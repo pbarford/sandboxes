@@ -64,7 +64,7 @@ object SignalTest {
 
   def connect:Connection = {
     val cf = new ConnectionFactory()
-    cf.setHost("127.0.0.1")
+    cf.setHost("docker.local")
     cf.setPort(5672)
     cf.setUsername("guest")
     cf.setPassword("guest")
@@ -87,7 +87,7 @@ object SignalTest {
 
   def consume(queueName:String)(implicit ch:com.rabbitmq.client.Channel): Process[Task, Unit] = {
     Process.eval ( Task.delay {
-      ch.basicConsume(queueName, false, new FeedConsumer(m => queueFeedMessage(m).run.unsafePerformSync))
+      ch.basicConsume(queueName, false, new FeedConsumer(m => queueFeedMessage(m).run.attemptRun))
       ()
     })
   }
@@ -158,9 +158,9 @@ object SignalTest {
 
     processes.run.runAsync(_ => ())
 
-    awakeEvery(5 seconds).map(x => generateTick(x).run.unsafePerformSync).run.runAsync(_ => ())
+    awakeEvery(5 seconds).map(x => generateTick(x).run.attemptRun).run.runAsync(_ => ())
 
-    awakeEvery(2 seconds).map(z => checker2(Some(z)).run.unsafePerformSync).run.runAsync(_ => ())
+    awakeEvery(2 seconds).map(z => checker2(Some(z)).run.attemptRun).run.runAsync(_ => ())
   }
 
   def generateTick(z:Duration): Process[Task,Unit] = {

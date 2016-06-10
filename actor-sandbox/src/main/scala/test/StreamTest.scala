@@ -40,11 +40,11 @@ object StreamTest {
     val ss:Process[Task, String] = q2.dequeue
 
     val ls = for(n <- 1 to 5) yield s"TESTING: $n"
-    q2.enqueueAll(ls).unsafePerformSync
+    q2.enqueueAll(ls).attemptRun
 
     println("ok")
 
-    ss.to(io.stdOutLines).runLog.unsafePerformSync
+    ss.to(io.stdOutLines).runLog.attemptRun
     println("done")
 
     val p = Process(5, 4, 3, 2, 1)

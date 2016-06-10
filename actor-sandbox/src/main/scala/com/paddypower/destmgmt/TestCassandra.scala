@@ -70,7 +70,7 @@ object TestCassandra {
         seqno <- 12 to 30
         stmt <- Seq(dummy(seqno))
       } yield cassandraProvider(executeAsyncStatement(stmt))
-      tasks.map { task => task.unsafePerformSync }
+      tasks.map { task => task.attemptRun }
 
       //Batch Async execute
       val stmts = for {
@@ -78,7 +78,7 @@ object TestCassandra {
         stmt <- Seq(bad(seqno))
       } yield stmt
       val batchTask = cassandraProvider(executeBatchAsync(stmts))
-      batchTask.unsafePerformSyncAttempt match {
+      batchTask.attemptRun match {
         case -\/(e) => println(s"error ${e.getMessage}")
         case \/-(a) => println("ok")
       }

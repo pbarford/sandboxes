@@ -33,10 +33,10 @@ object TaskTest {
 
   def main(args: Array[String]) {
 
-    val details = doIt.unsafePerformSync
+    val details = doIt.attemptRun
     println(details)
 
-    val r = get("http://www.bbc.co.uk").unsafePerformSync
+    val r = get("http://www.bbc.co.uk").run
     println(r.getStatusText)
 
   }

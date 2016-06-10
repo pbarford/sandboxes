@@ -1,8 +1,11 @@
+CREATE KEYSPACE test
+  WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1};
+
 CREATE TABLE events (
-  key text,
+  id int,
   seqno int,
   data text,
-  PRIMARY KEY ((key), seqno)
+  PRIMARY KEY ((id), seqno)
   ) WITH
     bloom_filter_fp_chance=0.010000 AND
     caching='KEYS_ONLY' AND

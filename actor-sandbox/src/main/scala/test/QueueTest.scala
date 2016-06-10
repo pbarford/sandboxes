@@ -128,13 +128,13 @@ object QueueTest {
     val pm3 = printM(aq3)
 
     val enqueueAll = merge.mergeN(300)(Process.range(1,300).map(Process.emit(_) to enqueue(q1,q2,q3)))
-    enqueueAll.run.unsafePerformSync
+    enqueueAll.run.attemptRun
 
     val delayAndPrintFlow = merge.mergeN(3)(Process(p1,p2,p3))
 
     val printMFlow = merge.mergeN(3)(Process(pm1,pm2,pm3))
 
-    delayAndPrintFlow.run.unsafePerformAsync(_ => ())
+    delayAndPrintFlow.run.runAsync(_ => ())
     //delayAndPrintFlow.runLog.unsafePerformSync
 
     Thread.sleep(1000)
@@ -142,7 +142,7 @@ object QueueTest {
     implicit val ch = connect.createChannel()
     try {
       printMFlow.run.runAsync(_ => ())
-      process("test").run.unsafePerformSync
+      process("test").run.attemptRun
     }
     finally {
       println("close")

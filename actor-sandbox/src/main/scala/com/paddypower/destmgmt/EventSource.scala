@@ -40,7 +40,7 @@ class EventSource(correlationKey:String) {
   }
 
   private def getSnapshot(implicit cp :CassandraProvider): String \/ Snapshot = {
-    cp(executeAsyncSelect(getLatestSnapshotStatement)).unsafePerformSyncAttempt match {
+    cp(executeAsyncSelect(getLatestSnapshotStatement)).attemptRun match {
       case -\/(t) => -\/(s"error : ${t.getMessage}")
       case \/-(rs) => {
         rs.one match {

@@ -116,7 +116,7 @@ object Ticker {
   }
 
   def main(args: Array[String]) {
-    process.run.unsafePerformSyncAttempt
+    process.run.attemptRun
   }
 
 }

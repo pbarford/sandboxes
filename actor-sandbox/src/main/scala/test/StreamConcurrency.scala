@@ -71,13 +71,13 @@ object StreamConcurrency {
   def main(args: Array[String]) {
 
     val z = ns through fetchChannel
-    println(z.runLog.unsafePerformSync)
+    println(z.runLog.attemptRun)
 
-    val s = p.runLog.unsafePerformSyncAttempt match {
+    val s = p.runLog.attemptRun match {
       case -\/(t) => println(t.getMessage)
       case \/-(p) => println(p)
     }
 
-    println { concurrentActions.runLog.unsafePerformSync }
+    println { concurrentActions.runLog.attemptRun }
   }
 }

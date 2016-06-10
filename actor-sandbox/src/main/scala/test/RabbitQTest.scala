@@ -80,7 +80,7 @@ object RabbitQTest {
 
   def consume(queueName:String)(implicit ch:com.rabbitmq.client.Channel): Process[Task, Unit] = {
     Process.eval ( Task.delay {
-      ch.basicConsume(queueName, false, new RabbitConsumer(m => qMsg(m).run.unsafePerformSync))
+      ch.basicConsume(queueName, false, new RabbitConsumer(m => qMsg(m).run.attemptRun))
       ()
     })
   }

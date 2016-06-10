@@ -23,24 +23,28 @@ object ScalazStreamTest {
 
     val src: Process[Task, String] = Process.range(1, 10) map { _.toString }
 
+    val src2: Process[Task, String] = Process.range(1, 10) map { _.toString }
+
+    val ex:Exchange[String, String] = Exchange(src2, io.stdOutLines)
+
     val res: Process[Task, Unit] = src zip sink flatMap {
       case (s, f) => Process eval(f(s))
     }
 
-    res.run.unsafePerformSync
+    res.run.attemptRun
 
     val w = writer.logged(src).mapW("debug : " + _)
                               .drainW(io.stdOutLines)
                               .map(s"info " + ).to(io.stdOutLines)
 
-    w.run.unsafePerformSync
+    w.run.attemptRun
 
     val z = writer.logged(Process.range(1, 10)).mapW("debug : " + _.toString )
                                   .drainW(io.stdOutLines)
                                   .map(_+1)
                                   .map(_.toString).to(io.stdOutLines)
 
-    z.run.unsafePerformSync
+    z.run.attemptRun
 
 
 
@@ -50,7 +54,7 @@ object ScalazStreamTest {
                 .map("Info : "  + _)
                 .to(io.stdOutLines)
 
-    y.run.unsafePerformSync
+    y.run.attemptRun
 
     /*
     val input: Process[Task,Boolean] = awakeEvery(300 milliseconds)(Strategy.DefaultStrategy, Strategy.DefaultTimeoutScheduler).map(_ => (math.random < 0.3))
@@ -66,6 +70,14 @@ object ScalazStreamTest {
     println(sig.get.run)
 */
 
+    def test():Process[Task,Unit] =
+    for {
+      e <- ex.read
+      _ <- emit(s"out ---> $e") to ex.write
+    } yield()
+
+    test.run.attemptRun
+
     val sig2:Signal[Boolean] = async.signalOf[Boolean](false)
 
     val onChange: Process[Task,Boolean] = sig2.discrete
@@ -74,14 +86,16 @@ object ScalazStreamTest {
     val p2 :Process[Task,Boolean] = Process.eval(Task.now{false})
 
     Task.fork( Process.sleepUntil(onChange)(p).repeat.run ).runAsync( _ => () )
-    sig2.set(true).unsafePerformSync
-    sig2.set(false).unsafePerformSync
+    sig2.set(true).attemptRun
+    sig2.set(false).attemptRun
     Thread.sleep(1)
-    sig2.set(true).unsafePerformSync
+    sig2.set(true).attemptRun
     Thread.sleep(1)
-    sig2.set(false).unsafePerformSync
+    sig2.set(false).attemptRun
 
     Thread.sleep(100)
+
+
 
 
   }

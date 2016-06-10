@@ -135,7 +135,7 @@ object RabbitMqTest {
   def main(args: Array[String]) {
     implicit val ch = connect.createChannel()
     try {
-      process3a("test").run.unsafePerformSyncAttempt
+      process3a("test").run.attemptRun
     }
     finally {
       ch.close()
