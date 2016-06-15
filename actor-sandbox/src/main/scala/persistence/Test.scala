@@ -2,7 +2,7 @@ package persistence
 
 import akka.actor.{Actor, ActorSystem, Props}
 import com.datastax.driver.core.{Cluster, Session}
-import persistence.EventX.Event
+import persistence.TestEvent._
 import persistence.RepositoryActor.{Persist, Persisted, Query}
 
 object Test {
@@ -34,11 +34,13 @@ class TestActor(journal:EventJournal) extends Actor {
       repo ! Query(1234)
     case Persisted(id, ev) =>
       println(s"** persisted [$ev]")
-    case Some(ev:Event) =>
-      println(s"state [$ev]")
-      repo ! Persist(1234, Event(1234, ev.seqNo + 1, s"update [${ev.seqNo+1}]"))
+    case Some(ev:TestEvent) =>
+      println(s"** state [$ev]")
+      repo ! Persist(1234, TestEvent(1234, ev.seqNo + 1, s"update [${ev.seqNo+1}]"))
     case None =>
-      println("no state")
-      repo ! Persist(1234, Event(1234, 1, "update [1]"))
+      println("** no state")
+      repo ! Persist(1234, TestEvent(1234, 1, "update [1]"))
+
+    case _ => println("unknown!!!!")
   }
 }

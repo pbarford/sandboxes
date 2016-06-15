@@ -4,6 +4,7 @@ CREATE KEYSPACE test
 CREATE TABLE events (
   id int,
   seqno int,
+  version int,
   data text,
   PRIMARY KEY ((id), seqno)
   ) WITH
@@ -17,7 +18,6 @@ CREATE TABLE events (
     populate_io_cache_on_flush='false' AND
     compaction={'class': 'SizeTieredCompactionStrategy'} AND
     compression={'sstable_compression': 'SnappyCompressor'};
-
 
 CREATE TABLE snapshots (
   key text,

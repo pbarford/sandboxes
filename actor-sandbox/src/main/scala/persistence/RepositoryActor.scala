@@ -1,6 +1,6 @@
 package persistence
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props, ReceiveTimeout, Stash}
+import akka.actor.{Actor, ActorLogging, ActorRef, FSM, Props, ReceiveTimeout, Stash}
 import algebra.lattice.BoundedJoinSemilattice
 import persistence.RepositoryActor._
 
@@ -10,57 +10,69 @@ object RepositoryActor {
   def props[A : Journaled](eventId: Long, journal:Journal[A]): Props = Props(new RepositoryActor[A](eventId, journal))
   case class Persist[A : Journaled](id: Long, event: A)
   case class Persisted[A : Journaled](id: Long, event: A)
-
   case class Restore[A](id: Long, event: A)
   case class RestoreComplete(id: Long)
   case class Query(eventId: Long)
   case object KillMe
+
+  sealed trait RepositoryStates
+  case object Restoring extends RepositoryStates
+  case object Running extends RepositoryStates
+
+  case class RepositoryState[A](current:Option[A], lastSender:Option[ActorRef])
 }
 
-class RepositoryActor[A : Journaled](eventId: Long, journal:Journal[A]) extends Actor with ActorLogging with Stash {
+class RepositoryActor[A : Journaled](eventId: Long, journal:Journal[A]) extends Actor with FSM[RepositoryStates, RepositoryState[A]] with ActorLogging with Stash {
 
   val journaled = implicitly[Journaled[A]]
   import journaled._
 
-  var state: Option[A] = None
-  type SideEffect = A => Unit
+  type SideEffect = (A, Option[ActorRef])  => Unit
 
-  journal.restore(eventId)(self).runAsync(_ => ())
+  override def preStart(): Unit = {
+    startWith(Restoring, RepositoryState(None,None))
+    journal.restore(eventId)(self).runAsync(_ => ())
+    initialize()
+  }
 
-  def init: Receive = {
-    case Restore(id, ev:A) =>
-      println(s"recover [$ev]")
-      updateState(None)(ev)
-    case RestoreComplete(id) =>
-      println(s"recover completed [$id]")
-      context.become(running)
+  when(Restoring) {
+    case Event(Restore(id, RepoEvent(ev)), _) =>
+      log.info(s"recover [$ev]")
+      stay() using (RepositoryState(updateState(None, None)(ev), None))
+    case Event(RestoreComplete(id), _) =>
+      log.info(s"recover completed [$id]")
       unstashAll()
-    case _ => stash
+      goto(Running) using stateData
+    case _ =>
+      stash()
+      stay()
   }
 
-  override def receive: Receive = init
-
-  def running: Receive = {
-    case Persist(id, RepoEvent(event)) =>
-      journal.write(event)(persistComplete(sender(), Some(updateSideEffects(id)))).runAsync(_ => ())
-    case Query(`eventId`) =>
-      println(s"query [$eventId]")
-      sender ! state
-    case ReceiveTimeout => context.parent ! KillMe
+  when(Running) {
+    case Event(Persist(id, RepoEvent(ev)), _) =>
+      journal.write(ev)(self).runAsync(_ => ())
+      stay() using (RepositoryState(stateData.current, Some(sender())))
+    case Event(Persisted(id, RepoEvent(ev)), _) =>
+      stay() using (RepositoryState(updateState(Some(updateSideEffects(id)), stateData.lastSender)(ev), None))
+    case Event(Query(`eventId`), _) =>
+      sender() ! stateData.current
+      stay()
+    case Event(ReceiveTimeout, _) =>
+      context.parent ! KillMe
+      stay()
   }
 
-  def persistComplete(rcv: ActorRef, sideEffects: Option[SideEffect])(event: A): Unit = {
-    updateState(sideEffects)(event)
-    rcv ! Persisted(eventId, event)
+  def updateState(sideEffects: Option[SideEffect], lastSender:Option[ActorRef])(event: A): Option[A] = {
+    sideEffects.foreach(effect => effect(event, lastSender))
+    Some(merger.join(stateData.current.getOrElse(merger.zero), event))
   }
 
-  def updateState(sideEffects: Option[SideEffect])(event: A): Unit = {
-    state = Some(merger.join(state.getOrElse(merger.zero), event))
-    sideEffects.foreach(_(event))
-  }
-
-  val updateSideEffects: Long => SideEffect = { eventId => event =>
-    println(s"persisted [$event]")
+  val updateSideEffects: Long => SideEffect = { eventId => (event, lastSender) =>
+    log.info(s"persisted [$event]")
+    lastSender match {
+      case Some(ref) => ref ! Persisted(eventId, event)
+      case None => log.info("no lastSender")
+    }
   }
 }
 
