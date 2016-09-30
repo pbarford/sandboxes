@@ -17,6 +17,7 @@ import com.paddypower.destmgmt.Cassandra._
 
 object Import {
 
+  /*
   private val client = new AsyncHttpClient
 
   def cassandraProvider(points:String, user:String, pass:String, keyspace:String) = new CassandraProvider {
@@ -33,10 +34,11 @@ object Import {
     }
   }
 
+
   private def trustAllWithoutCertOptions: SSLOptions = {
     val context = SSLContext.getInstance("TLS")
     context.init(null, Array[TrustManager](new TrustAllManager()), new SecureRandom)
-    new SSLOptions(context, SSLOptions.DEFAULT_SSL_CIPHER_SUITES)
+    new SSLOptions(context, SSLOptions)
   }
 
   lazy val cassandraOat = cassandraProvider("10.105.160.13", "dm_oat", "465m1bvNorzw0ft41mI8", "dm_keyspace_oat")
@@ -72,6 +74,7 @@ object Import {
   def main(args: Array[String]) {
     runInOat(process())
   }
+  */
 
 }
 

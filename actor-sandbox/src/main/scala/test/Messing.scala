@@ -58,12 +58,10 @@ object Messing {
     val c = List(check1 _ , check2 _)
 
     println(c.map(_ apply "tesdt pdaul hdello").flatMap {
-      x => x match
-      {
-        case RulePass(x) => List.empty
-        case RuleFailure(x) => x
-      }
+      case RulePass(x) => List.empty
+      case RuleFailure(x) => x
     })
+
     println(c.map(_ apply "test paudl helldo" ))
 
 

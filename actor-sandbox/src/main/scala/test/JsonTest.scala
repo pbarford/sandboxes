@@ -1,5 +1,7 @@
 package test
 
+import org.json4s.native.Serialization
+
 object JsonTest {
 
   case class HttpResponse(query:Query)
@@ -22,7 +24,13 @@ object JsonTest {
     case class Message(value:String)
     case class Test(name:String)
     val rawJson = """{"message": { "value":"world" }, "age": 42, "test": [{"name":"tesT"}] }"""
+    import native.Serialization.{read => sread, write => swrite}
+    implicit val fmats = Serialization.formats(NoTypeHints)
+    val d: JValue = parse(rawJson)
+    println(d.extract[Model])
 
-    println(parse(rawJson).extract[Model])
+    println(swrite(d.extract[Model]))
+
+
   }
 }

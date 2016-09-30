@@ -6,7 +6,7 @@ CREATE TABLE events (
   seqno int,
   version int,
   data text,
-  PRIMARY KEY ((id), seqno)
+  PRIMARY KEY ((id), seqno, tickno)
   ) WITH
     bloom_filter_fp_chance=0.010000 AND
     caching='KEYS_ONLY' AND
