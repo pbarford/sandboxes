@@ -32,15 +32,12 @@ libraryDependencies ++= Seq(
   "com.github.julien-truffaut"  %%  "monocle-law"     % libraryVersion % "test",
   "org.apache.storm" % "storm-core" % "1.0.2",
   "org.scalactic" %% "scalactic" % "3.0.0",
-  "org.scalatest" %% "scalatest" % "3.0.0" % "test",
-  "org.apache.spark" %% "spark-core" % "2.0.0",
-  "org.apache.spark" %% "spark-streaming" % "2.0.0",
-  "org.apache.spark" %% "spark-streaming-kafka-0-8" % "2.0.0"
-
-)
+  "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+).map(_.excludeAll(ExclusionRule("slf4j-log4j12")))
 
 resolvers ++= Seq(
-  "Maven" at "http://repo.maven.apache.org/maven2/",
+  "Maven" at "http://http://central.maven.org/maven2/",
+  "MavenR" at "http://http://repo.maven.org/maven2/",
   "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
   "MfgLabs" at "http://dl.bintray.com/mfglabs/maven",
   "OSS" at "http://oss.sonatype.org/content/repositories/releases",
@@ -49,7 +46,6 @@ resolvers ++= Seq(
   "clojure-releases" at "http://build.clojure.org/releases",
   Resolver.sonatypeRepo("releases")
 )
-
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.7.1")
 //addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
