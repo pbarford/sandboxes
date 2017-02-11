@@ -56,7 +56,6 @@ class AmqpSource(channel:Channel, settings:AmqpSourceSettings) extends GraphStag
           }
 
           override def handleDelivery(consumerTag: String, envelope: Envelope, properties: BasicProperties, body: Array[Byte]): Unit = {
-            println("handleDelivery")
             consumerCallback.invoke(Message(envelope.getDeliveryTag, new String(body)))
           }
         }
@@ -74,11 +73,8 @@ class AmqpSource(channel:Channel, settings:AmqpSourceSettings) extends GraphStag
       }
 
       setHandler(out, new AbstractOutHandler {
-        println("ok")
         override def onPull() = {
-          println("onPull")
           if (queue.nonEmpty) {
-            println("pushMessage")
             pushMessage(queue.dequeue())
           }
         }
