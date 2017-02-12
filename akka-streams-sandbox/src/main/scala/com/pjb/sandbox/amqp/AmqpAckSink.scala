@@ -28,7 +28,7 @@ class AmqpAckSink(publishChannel:Channel, settings:AmqpAckSinkSettings) extends 
     new GraphStageLogic(shape) {
       setHandler(in, new AbstractInHandler() {
         override def onPush(): Unit = {
-          val element:PublishAndAckMessage = grab(in)
+          val msg:PublishAndAckMessage = grab(in)
 
           publishChannel.txSelect()
           publishChannel.basicPublish(
@@ -37,10 +37,10 @@ class AmqpAckSink(publishChannel:Channel, settings:AmqpAckSinkSettings) extends 
             false,
             false,
             null,
-            element.data.getBytes
+            msg.data.getBytes
           )
           publishChannel.txCommit()
-          element.ack()
+          msg.ack()
           pull(in)
         }
       })
