@@ -25,10 +25,10 @@ object AmqpStreamTest extends App {
   val connection = connectionFactory.newConnection()
   val inChannel:Channel = connection.createChannel()
   val outChannel:Channel = connection.createChannel()
-  val amqpSourceSettings:AmqpSourceSettings = AmqpSourceSettings("inbound-q", "stream-test", false)
+  val amqpSourceSettings:AmqpSourceSettings = AmqpSourceSettings("inbound-q", "stream-test", ackOnPush = false)
   val amqpSinkSettings:AmqpAckSinkSettings = AmqpAckSinkSettings("outbound", "")
 
-  def ackMessage(tag:Long) = inChannel.basicAck(tag, false)
+  def ackMessage(tag:Long):Unit = inChannel.basicAck(tag, false)
 
   AmqpSource.toSource(inChannel, amqpSourceSettings)
       .mapAsync(1) { msg =>

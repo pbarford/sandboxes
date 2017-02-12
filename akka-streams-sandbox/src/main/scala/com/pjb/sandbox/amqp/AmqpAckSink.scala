@@ -1,5 +1,6 @@
 package com.pjb.sandbox.amqp
 
+import akka.NotUsed
 import akka.stream.scaladsl.Sink
 import akka.stream.stage.{AbstractInHandler, GraphStage, GraphStageLogic}
 import akka.stream.{Attributes, Inlet, SinkShape}
@@ -13,7 +14,7 @@ object AmqpAckSink {
 
   case class PublishMessage(deliveryTag:Long, data:String)
 
-  def toSink(ack:  Long => Unit, publishChannel:Channel, settings:AmqpAckSinkSettings) =
+  def toSink(ack:  Long => Unit, publishChannel:Channel, settings:AmqpAckSinkSettings): Sink[PublishMessage, NotUsed] =
     Sink.fromGraph(new AmqpAckSink(ack, publishChannel, settings))
 }
 

@@ -38,7 +38,7 @@ class AmqpSource(channel:Channel, settings:AmqpSourceSettings) extends GraphStag
         init()
       }
 
-      def init() = {
+      def init():Unit = {
         println("init")
         val consumerCallback = getAsyncCallback(handleDelivery)
         val shutdownCallback = getAsyncCallback[Option[ShutdownSignalException]] {
@@ -73,7 +73,7 @@ class AmqpSource(channel:Channel, settings:AmqpSourceSettings) extends GraphStag
       }
 
       setHandler(out, new AbstractOutHandler {
-        override def onPull() = {
+        override def onPull(): Unit = {
           if (queue.nonEmpty) {
             pushMessage(queue.dequeue())
           }
