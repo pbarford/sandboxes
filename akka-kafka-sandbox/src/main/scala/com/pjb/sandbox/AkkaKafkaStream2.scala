@@ -30,6 +30,6 @@ object AkkaKafkaStream2 extends App {
         sub = Subscriptions.assignmentWithOffset(new TopicPartition("input", partition) -> fromOffset)
 
     } yield Consumer.plainSource(consumerSettings, sub)
-          .mapAsync(1)((record: ConsumerRecord[Array[Byte], String]) => service.process(record)).map(db.saveOffset)
+          .mapAsync(1)((record: ConsumerRecord[Array[Byte], String]) => service.process(record)).map(db.saveResult)
           .runWith(Sink.ignore)
 }

@@ -15,3 +15,10 @@ services:
 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+  rabbitmq:
+    build: docker/rabbitmq
+    hostname: rabbitmq
+    command: rabbitmq-server start
+    ports:
+        - "5672:5672"
+        - "15672:15672"

@@ -17,10 +17,10 @@ class InMemCommitLog(initialOffSet:Long = 0) {
         Future.successful(Done)
     }
 
-    def saveOffset(ack:Ack): Future[Done] = {
-        println(s"InMemCommitLog.save: $ack")
-        offset.set(ack.offset)
-        Future.successful(Done)
+    def saveResult(result:Result): Future[Result] = {
+        println(s"InMemCommitLog.save: $result")
+        offset.set(result.offset)
+        Future.successful(result)
     }
 
     def loadOffset(): Future[Long] =

@@ -5,7 +5,8 @@ version := "1.0"
 scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
-    "com.typesafe.akka" %% "akka-stream-kafka" % "0.11"
+    "com.typesafe.akka" %% "akka-stream-kafka" % "0.11",
+    "com.rabbitmq" % "amqp-client" % "3.6.6"
 )
 
 resolvers ++= Seq(
