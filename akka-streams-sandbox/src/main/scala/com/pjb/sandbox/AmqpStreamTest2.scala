@@ -63,7 +63,7 @@ object AmqpStreamTest2 extends App {
     inChannel.basicAck(res.id, false)
   }
 
-  def flow: Flow[Message, Future[Future[String]], NotUsed] = {
+  def flow: Flow[Message, Future[Future[Actor2Result]], NotUsed] = {
     Flow[Message]
       .map(sendActor1)
         .map(f => f.map(sendActor2))
@@ -71,23 +71,27 @@ object AmqpStreamTest2 extends App {
             f1.map { f2 =>
               f2.map { r =>
                 pubAndAckMessage(r)
-                r.payload
+                r
               }
             }
           }
   }
 
-  def aSink(prefix:String) = Sink.foreach[Future[Future[String]]](f1 => f1.map(f2=>f2.map(s => println(s"$prefix = $s"))))
+  def aSink(prefix:String) = Sink.foreach[Future[Future[Actor2Result]]] { f1 =>
+    f1.map(f2 => f2.map(s => println(s"${Thread.currentThread().getName} :: $prefix = ${s.id}.${s.payload}")))
+  }
 
   val stream = RunnableGraph.fromGraph(GraphDSL.create() { implicit builder: GraphDSL.Builder[NotUsed] =>
     import GraphDSL.Implicits._
     val in = AmqpSource2.toSource(inChannel, amqpSourceSettings)
-    val balance = builder.add(Balance[Message](2))
+    val count = 30
+    val balance = builder.add(Balance[Message](count))
     in ~> balance.in
-    balance.out(0) ~> flow ~> aSink("SINK1")
-    balance.out(1) ~> flow ~> aSink("SINK2")
+    for(i <- 0 until count)
+      balance.out(i) ~> flow ~> aSink(s"SINK$i")
     ClosedShape
   })
+  
   Thread.sleep(5000)
 
   stream.run()

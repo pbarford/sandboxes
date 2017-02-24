@@ -37,7 +37,6 @@ class AmqpSource2 (channel:Channel, settings:AmqpSourceSettings) extends GraphSt
         override def onPull(): Unit = {
           if(isAvailable(out)) {
             try {
-
               val msg = channel.basicGet(settings.queue, settings.ackOnPush)
               consumerCallback.invoke(Message(msg.getEnvelope.getDeliveryTag, new String(msg.getBody)))
             }
