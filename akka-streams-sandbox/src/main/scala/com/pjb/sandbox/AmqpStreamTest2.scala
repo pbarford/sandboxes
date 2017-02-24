@@ -77,7 +77,7 @@ object AmqpStreamTest2 extends App {
           }
   }
 
-  def aSink(prefix:String) = Sink.foreach[Future[Future[Actor2Result]]] { f1 =>
+  def sink(prefix:String) = Sink.foreach[Future[Future[Actor2Result]]] { f1 =>
     f1.map(f2 => f2.map(s => println(s"${Thread.currentThread().getName} :: $prefix = ${s.id}.${s.payload}")))
   }
 
@@ -88,7 +88,7 @@ object AmqpStreamTest2 extends App {
     val balance = builder.add(Balance[Message](count))
     in ~> balance.in
     for(i <- 0 until count)
-      balance.out(i) ~> flow ~> aSink(s"SINK$i")
+      balance.out(i) ~> flow ~> sink(s"SINK$i")
     ClosedShape
   })
 
