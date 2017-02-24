@@ -24,7 +24,7 @@ object Actor2 {
 class Actor2 extends Actor with ActorLogging {
   override def receive: Receive = {
     case Actor2Message(id, payload) =>
-      log.info(payload.toUpperCase)
+      log.info(s"output [${payload.toUpperCase}]")
       sender() ! Actor2Result(id, payload.toUpperCase)
   }
 }

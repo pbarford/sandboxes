@@ -10,7 +10,6 @@ import akka.util.Timeout
 import com.pjb.sandbox.actors.Actor1.{Actor1Message, Actor1Result}
 import com.pjb.sandbox.actors.Actor2.{Actor2Message, Actor2Result}
 import com.pjb.sandbox.actors.{Actor1, Actor2}
-import com.pjb.sandbox.amqp.AmqpAckSink.AmqpAckSinkSettings
 import com.pjb.sandbox.amqp._
 import com.rabbitmq.client.{Channel, ConnectionFactory}
 
@@ -48,7 +47,6 @@ object AmqpStreamTest2 extends App {
   val inChannel:Channel = connection.createChannel()
   val outChannel:Channel = connection.createChannel()
   val amqpSourceSettings:AmqpSourceSettings = AmqpSourceSettings("inbound-q", "stream-test", ackOnPush = false)
-  val amqpSinkSettings:AmqpAckSinkSettings = AmqpAckSinkSettings("outbound", "")
 
   def sendActor1 : Message => Future[Actor1Result] = { m =>
     implicit val timeout = Timeout(5 seconds)
@@ -90,6 +88,7 @@ object AmqpStreamTest2 extends App {
     balance.out(1) ~> flow ~> aSink("SINK2")
     ClosedShape
   })
+  Thread.sleep(5000)
 
   stream.run()
 }
