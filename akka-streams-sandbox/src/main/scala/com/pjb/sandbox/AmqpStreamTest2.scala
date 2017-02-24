@@ -84,14 +84,14 @@ object AmqpStreamTest2 extends App {
   val stream = RunnableGraph.fromGraph(GraphDSL.create() { implicit builder: GraphDSL.Builder[NotUsed] =>
     import GraphDSL.Implicits._
     val in = AmqpSource2.toSource(inChannel, amqpSourceSettings)
-    val count = 30
+    val count = 50
     val balance = builder.add(Balance[Message](count))
     in ~> balance.in
     for(i <- 0 until count)
       balance.out(i) ~> flow ~> aSink(s"SINK$i")
     ClosedShape
   })
-  
+
   Thread.sleep(5000)
 
   stream.run()
