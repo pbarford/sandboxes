@@ -3,8 +3,7 @@ package com.pjb.sandbox
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.pjb.sandbox.amqp.AmqpAckSink.{AmqpAckSinkSettings, PublishAndAckMessage}
-import com.pjb.sandbox.amqp.{AmqpAckSink, AmqpSource}
-import com.pjb.sandbox.amqp.AmqpSource.AmqpSourceSettings
+import com.pjb.sandbox.amqp.{AmqpAckSink, AmqpSource, AmqpSourceSettings}
 import com.rabbitmq.client.{Channel, ConnectionFactory}
 
 import scala.concurrent.Future

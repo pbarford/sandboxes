@@ -4,22 +4,12 @@ import akka.NotUsed
 import akka.stream.scaladsl.Source
 import akka.stream.stage.{AbstractOutHandler, GraphStage, GraphStageLogic}
 import akka.stream.{Attributes, Outlet, SourceShape}
-import com.pjb.sandbox.amqp.AmqpSource.{AmqpSourceSettings, Message}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client._
 
 import scala.collection.mutable
 
 object AmqpSource {
-  case class AmqpSourceSettings(queue:String,
-                            consumerTag:String,
-                            ackOnPush:Boolean,
-                            bufferSize: Int = 10,
-                            noLocal:Boolean = false,
-                            exclusive:Boolean = false,
-                            arguments: Map[String, AnyRef] = Map.empty)
-  case class Message(deliveryTag:Long, data:String)
-
   def toSource(channel: Channel, settings: AmqpSourceSettings): Source[Message, NotUsed] =
     Source.fromGraph(new AmqpSource(channel, settings))
 }
