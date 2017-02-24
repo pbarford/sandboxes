@@ -65,7 +65,6 @@ object AmqpStreamTest2 extends App {
     inChannel.basicAck(res.id, false)
   }
 
-  def aSink = AmqpAckSink.toSink(outChannel, amqpSinkSettings)
   def flow: Flow[Message, Future[Future[String]], NotUsed] = {
     Flow[Message]
       .map(sendActor1)
@@ -80,14 +79,15 @@ object AmqpStreamTest2 extends App {
           }
   }
 
+  def aSink(prefix:String) = Sink.foreach[Future[Future[String]]](f1 => f1.map(f2=>f2.map(s => println(s"$prefix = $s"))))
 
   val stream = RunnableGraph.fromGraph(GraphDSL.create() { implicit builder: GraphDSL.Builder[NotUsed] =>
     import GraphDSL.Implicits._
     val in = AmqpSource2.toSource(inChannel, amqpSourceSettings)
     val balance = builder.add(Balance[Message](2))
     in ~> balance.in
-    balance.out(0) ~> flow ~> Sink.foreach[Future[Future[String]]](f1 => f1.map(f2=>f2.map(s => println(s"SINK1 = $s"))))
-    balance.out(1) ~> flow ~> Sink.foreach[Future[Future[String]]](f1 => f1.map(f2=>f2.map(s => println(s"SINK2 = $s"))))
+    balance.out(0) ~> flow ~> aSink("SINK1")
+    balance.out(1) ~> flow ~> aSink("SINK2")
     ClosedShape
   })
 
